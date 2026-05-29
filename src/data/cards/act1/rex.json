@@ -1,0 +1,151 @@
+[
+  {
+    "id": "morso_r",
+    "name": { "it": "Morso" },
+    "hero": "rex",
+    "cost": 1,
+    "type": "attack",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["carnivoro", "theropode"],
+    "effects": [{ "kind": "damage", "amount": 6, "target": "enemy" }],
+    "upgraded": { "effects": [{ "kind": "damage", "amount": 9, "target": "enemy" }] },
+    "flavorIt": "La prima mossa di un predatore è la più letale."
+  },
+  {
+    "id": "affondo_r",
+    "name": { "it": "Affondo" },
+    "hero": "rex",
+    "cost": 2,
+    "type": "attack",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["carnivoro", "theropode", "predatore"],
+    "effects": [{ "kind": "damage", "amount": 11, "target": "enemy" }],
+    "upgraded": { "cost": 1, "effects": [{ "kind": "damage", "amount": 11, "target": "enemy" }] }
+  },
+  {
+    "id": "coda_spazzante_r",
+    "name": { "it": "Coda Spazzante" },
+    "hero": "rex",
+    "cost": 1,
+    "type": "attack",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["theropode"],
+    "effects": [{ "kind": "damage", "amount": 4, "target": "all_enemies" }],
+    "upgraded": { "effects": [{ "kind": "damage", "amount": 6, "target": "all_enemies" }] }
+  },
+  {
+    "id": "ruggito_r",
+    "name": { "it": "Ruggito" },
+    "hero": "rex",
+    "cost": 1,
+    "type": "skill",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["theropode", "carnivoro"],
+    "effects": [{ "kind": "applyStatus", "status": "strength", "stacks": 2, "target": "self" }],
+    "upgraded": { "effects": [{ "kind": "applyStatus", "status": "strength", "stacks": 3, "target": "self" }] }
+  },
+  {
+    "id": "predatore_alpha_r",
+    "name": { "it": "Predatore Alpha" },
+    "hero": "rex",
+    "cost": 3,
+    "type": "attack",
+    "rarity": "rare",
+    "act": 1,
+    "tags": ["carnivoro", "theropode", "predatore"],
+    "effects": [
+      { "kind": "damage", "amount": 22, "target": "enemy" },
+      { "kind": "exhaust", "target": "self" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "damage", "amount": 28, "target": "enemy" },
+        { "kind": "exhaust", "target": "self" }
+      ]
+    },
+    "flavorIt": "Nessuna preda sopravvive all'apice della catena alimentare."
+  },
+  {
+    "id": "istinto_caccia_r",
+    "name": { "it": "Istinto di Caccia" },
+    "hero": "rex",
+    "cost": 0,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["carnivoro", "predatore"],
+    "effects": [
+      { "kind": "draw", "n": 2 },
+      { "kind": "applyStatus", "status": "weak", "stacks": 1, "target": "enemy" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "draw", "n": 2 },
+        { "kind": "applyStatus", "status": "weak", "stacks": 2, "target": "enemy" }
+      ]
+    }
+  },
+  {
+    "id": "morso_potenziato_r",
+    "name": { "it": "Morso Potenziato" },
+    "hero": "rex",
+    "cost": 2,
+    "type": "attack",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["carnivoro", "theropode"],
+    "effects": [{ "kind": "damage", "amount": 14, "target": "enemy" }],
+    "upgraded": { "effects": [{ "kind": "damage", "amount": 18, "target": "enemy" }] },
+    "flavorIt": "Più grandi le fauci, più profondo il morso."
+  },
+  {
+    "id": "carica_alpha_r",
+    "name": { "it": "Carica Alpha" },
+    "hero": "rex",
+    "cost": 2,
+    "type": "attack",
+    "rarity": "uncommon",
+    "act": 1,
+    "tags": ["carnivoro", "theropode", "predatore"],
+    "effects": [
+      { "kind": "damage", "amount": 9, "target": "enemy" },
+      { "kind": "applyStatus", "status": "vigor", "stacks": 3, "target": "self" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "damage", "amount": 12, "target": "enemy" },
+        { "kind": "applyStatus", "status": "vigor", "stacks": 4, "target": "self" }
+      ]
+    }
+  },
+  {
+    "id": "sentinella_apex_r",
+    "name": { "it": "Sentinella Apex" },
+    "hero": "rex",
+    "cost": 1,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["theropode", "predatore"],
+    "effects": [{ "kind": "block", "amount": 8 }],
+    "upgraded": { "effects": [{ "kind": "block", "amount": 12 }] },
+    "flavorIt": "Il predatore conosce ogni angolo del suo territorio."
+  },
+  {
+    "id": "ruggito_sismico_r",
+    "name": { "it": "Ruggito Sismico" },
+    "hero": "rex",
+    "cost": 2,
+    "type": "power",
+    "rarity": "uncommon",
+    "act": 1,
+    "tags": ["theropode", "carnivoro"],
+    "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 2, "target": "self" }],
+    "upgraded": { "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 3, "target": "self" }] },
+    "flavorIt": "Il terreno trema. I nemici tremano di più."
+  }
+]

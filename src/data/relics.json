@@ -1,0 +1,106 @@
+[
+  {
+    "id": "dente_spezzato",
+    "name": { "it": "Dente Spezzato" },
+    "description": "+1 danno su tutte le Attack.",
+    "tier": "starter",
+    "trigger": "on_attack",
+    "effects": [
+      { "kind": "applyStatus", "status": "strength", "stacks": 1, "target": "self" }
+    ],
+    "art": { "icon": "Sword" }
+  },
+  {
+    "id": "piuma_antica",
+    "name": { "it": "Piuma Antica" },
+    "description": "Pesca 1 carta extra al primo turno di ogni combat.",
+    "tier": "starter",
+    "trigger": "on_battle_start",
+    "effects": [
+      { "kind": "draw", "n": 1 }
+    ],
+    "art": { "icon": "Wind" }
+  },
+  {
+    "id": "scaglia_madre",
+    "name": { "it": "Scaglia Madre" },
+    "description": "+3 block extra da ogni effetto di block.",
+    "tier": "starter",
+    "trigger": "on_block",
+    "effects": [
+      { "kind": "block", "amount": 3 }
+    ],
+    "art": { "icon": "Shield" }
+  },
+  {
+    "id": "ambra_predatoria",
+    "name": { "it": "Ambra Predatoria" },
+    "description": "La prima Attack di ogni combat infligge il doppio del danno.",
+    "tier": "common",
+    "trigger": "on_battle_start",
+    "effects": [],
+    "counterMax": 1,
+    "art": { "icon": "Gem" }
+  },
+  {
+    "id": "cuore_di_pietra",
+    "name": { "it": "Cuore di Pietra" },
+    "description": "+8 HP massimi.",
+    "tier": "common",
+    "trigger": "on_relic_equip",
+    "effects": [
+      { "kind": "heal", "amount": 8 }
+    ],
+    "art": { "icon": "Heart" }
+  },
+  {
+    "id": "cranio_fossile",
+    "name": { "it": "Cranio Fossile" },
+    "description": "Vedi 4 carte reward invece di 3.",
+    "tier": "uncommon",
+    "trigger": "on_relic_equip",
+    "effects": [],
+    "art": { "icon": "Skull" }
+  },
+  {
+    "id": "zanna_del_re",
+    "name": { "it": "Zanna del Re" },
+    "description": "Ogni nemico ucciso: +1 danno permanente (max +5 per run).",
+    "tier": "rare",
+    "trigger": "on_kill",
+    "effects": [
+      { "kind": "applyStatus", "status": "strength", "stacks": 1, "target": "self" }
+    ],
+    "counterMax": 5,
+    "art": { "icon": "Crown" }
+  },
+  {
+    "id": "pelle_resistente",
+    "name": { "it": "Pelle Resistente" },
+    "description": "-25% danno da Veleno e Sanguinamento.",
+    "tier": "uncommon",
+    "trigger": "on_relic_equip",
+    "effects": [],
+    "art": { "icon": "Shield" }
+  },
+  {
+    "id": "uovo_del_primo",
+    "name": { "it": "Uovo del Primo" },
+    "description": "Meta: all'inizio della run ottieni 1 evoluzione gratuita anticipata.",
+    "tier": "ancestral",
+    "trigger": "on_run_start",
+    "effects": [],
+    "art": { "icon": "Egg" }
+  },
+  {
+    "id": "lacrima_triassica",
+    "name": { "it": "Lacrima Triassica" },
+    "description": "Meta: +1 energia massima al primo turno di ogni combat.",
+    "tier": "ancestral",
+    "trigger": "on_battle_start",
+    "effects": [
+      { "kind": "gainEnergy", "n": 1 }
+    ],
+    "art": { "icon": "Droplet" }
+  }
+]

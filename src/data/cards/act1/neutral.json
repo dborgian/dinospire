@@ -1,0 +1,329 @@
+[
+  {
+    "id": "compagno",
+    "name": { "it": "Compagno" },
+    "cost": 0,
+    "type": "attack",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["branco", "compagno"],
+    "effects": [{ "kind": "damage", "amount": 3, "target": "enemy" }],
+    "upgraded": { "effects": [{ "kind": "damage", "amount": 5, "target": "enemy" }] }
+  },
+  {
+    "id": "compagno_neutro",
+    "name": { "it": "Compagno" },
+    "cost": 0,
+    "type": "attack",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["branco", "compagno"],
+    "effects": [{ "kind": "damage", "amount": 3, "target": "enemy" }],
+    "upgraded": { "effects": [{ "kind": "damage", "amount": 5, "target": "enemy" }] }
+  },
+  {
+    "id": "morso_neutro",
+    "name": { "it": "Morso" },
+    "cost": 1,
+    "type": "attack",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["carnivoro"],
+    "effects": [{ "kind": "damage", "amount": 8, "target": "enemy" }],
+    "upgraded": { "effects": [{ "kind": "damage", "amount": 11, "target": "enemy" }] }
+  },
+  {
+    "id": "sferzata_di_coda",
+    "name": { "it": "Sferzata di Coda" },
+    "cost": 1,
+    "type": "attack",
+    "rarity": "common",
+    "act": 1,
+    "tags": [],
+    "effects": [
+      { "kind": "damage", "amount": 6, "target": "enemy" },
+      { "kind": "applyStatus", "status": "weak", "stacks": 1, "target": "enemy" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "damage", "amount": 8, "target": "enemy" },
+        { "kind": "applyStatus", "status": "weak", "stacks": 1, "target": "enemy" }
+      ]
+    }
+  },
+  {
+    "id": "ruggito_sismico",
+    "name": { "it": "Ruggito Sismico" },
+    "cost": 2,
+    "type": "power",
+    "rarity": "uncommon",
+    "act": 1,
+    "tags": [],
+    "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 2, "target": "self" }],
+    "upgraded": { "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 3, "target": "self" }] },
+    "flavorIt": "Un suono primordiale che scuote anche i più coraggiosi."
+  },
+  {
+    "id": "camuffamento",
+    "name": { "it": "Camuffamento" },
+    "cost": 0,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["furtivo"],
+    "effects": [
+      { "kind": "block", "amount": 5 },
+      { "kind": "applyStatus", "status": "dodge", "stacks": 2, "target": "self" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "block", "amount": 7 },
+        { "kind": "applyStatus", "status": "dodge", "stacks": 2, "target": "self" }
+      ]
+    }
+  },
+  {
+    "id": "mandria",
+    "name": { "it": "Mandria" },
+    "cost": 1,
+    "type": "skill",
+    "rarity": "uncommon",
+    "act": 1,
+    "tags": ["erbivoro", "mandria"],
+    "effects": [
+      {
+        "kind": "synergy",
+        "minCards": 3,
+        "tags": ["erbivoro", "mandria"],
+        "bonus": [{ "kind": "block", "amount": 4 }]
+      },
+      { "kind": "block", "amount": 4 }
+    ],
+    "upgraded": {
+      "effects": [
+        {
+          "kind": "synergy",
+          "minCards": 3,
+          "tags": ["erbivoro", "mandria"],
+          "bonus": [{ "kind": "block", "amount": 6 }]
+        },
+        { "kind": "block", "amount": 6 }
+      ]
+    }
+  },
+  {
+    "id": "placca_ossea",
+    "name": { "it": "Placca Ossea" },
+    "cost": 1,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["ankylosauro"],
+    "effects": [{ "kind": "block", "amount": 8 }],
+    "upgraded": { "effects": [{ "kind": "block", "amount": 11 }] }
+  },
+  {
+    "id": "carica_cornuta",
+    "name": { "it": "Carica Cornuta" },
+    "cost": 2,
+    "type": "attack",
+    "rarity": "uncommon",
+    "act": 1,
+    "tags": ["ceratopside"],
+    "effects": [{ "kind": "damage", "amount": 14, "target": "enemy" }],
+    "upgraded": { "cost": 1, "effects": [{ "kind": "damage", "amount": 14, "target": "enemy" }] },
+    "flavorIt": "Il corno del triceratopo è l'arma più antica e affidabile."
+  },
+  {
+    "id": "ghiandola_velenifera",
+    "name": { "it": "Ghiandola Velenifera" },
+    "cost": 1,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["spinosauride"],
+    "effects": [{ "kind": "applyStatus", "status": "poison", "stacks": 3, "target": "enemy" }],
+    "upgraded": { "effects": [{ "kind": "applyStatus", "status": "poison", "stacks": 5, "target": "enemy" }] }
+  },
+  {
+    "id": "crescita_lenta",
+    "name": { "it": "Crescita Lenta" },
+    "cost": 1,
+    "type": "power",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["triassico"],
+    "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 1, "target": "self" }],
+    "upgraded": { "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 2, "target": "self" }] },
+    "flavorIt": "La vita trova sempre un modo per prosperare."
+  },
+  {
+    "id": "termoregolazione",
+    "name": { "it": "Termoregolazione" },
+    "cost": 0,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": [],
+    "effects": [
+      { "kind": "draw", "n": 2 },
+      { "kind": "exhaust", "target": "self" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "draw", "n": 3 },
+        { "kind": "exhaust", "target": "self" }
+      ]
+    },
+    "flavorIt": "Il corpo si adatta. La mente si chiarisce."
+  },
+  {
+    "id": "sguardo_feroce",
+    "name": { "it": "Sguardo Feroce" },
+    "cost": 1,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["predatore"],
+    "effects": [
+      { "kind": "applyStatus", "status": "vulnerable", "stacks": 2, "target": "enemy" },
+      { "kind": "applyStatus", "status": "weak", "stacks": 1, "target": "enemy" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "applyStatus", "status": "vulnerable", "stacks": 3, "target": "enemy" },
+        { "kind": "applyStatus", "status": "weak", "stacks": 2, "target": "enemy" }
+      ]
+    }
+  },
+  {
+    "id": "eco_del_cretaceo",
+    "name": { "it": "Eco del Cretaceo" },
+    "cost": 2,
+    "type": "power",
+    "rarity": "rare",
+    "act": 1,
+    "tags": ["cretaceo"],
+    "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 2, "target": "self" }],
+    "upgraded": { "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 3, "target": "self" }] },
+    "flavorIt": "Il Cretaceo fu l'era d'oro dei dinosauri. Quell'eco risuona ancora."
+  },
+  {
+    "id": "uovo_marcio",
+    "name": { "it": "Uovo Marcio" },
+    "cost": 0,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": [],
+    "effects": [
+      { "kind": "applyStatus", "status": "hex_rotten_egg", "stacks": 1, "target": "self" },
+      { "kind": "exhaust", "target": "self" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "exhaust", "target": "self" }
+      ]
+    },
+    "flavorIt": "Qualcuno ha lasciato questo qui di proposito."
+  },
+  {
+    "id": "zanna_tagliente",
+    "name": { "it": "Zanna Tagliente" },
+    "cost": 1,
+    "type": "attack",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["carnivoro"],
+    "effects": [{ "kind": "damage", "amount": 7, "target": "enemy" }],
+    "upgraded": { "effects": [{ "kind": "damage", "amount": 10, "target": "enemy" }] }
+  },
+  {
+    "id": "scudo_naturale",
+    "name": { "it": "Scudo Naturale" },
+    "cost": 1,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["erbivoro"],
+    "effects": [{ "kind": "block", "amount": 6 }],
+    "upgraded": { "effects": [{ "kind": "block", "amount": 9 }] }
+  },
+  {
+    "id": "istinto_primordiale",
+    "name": { "it": "Istinto Primordiale" },
+    "cost": 0,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": [],
+    "effects": [{ "kind": "draw", "n": 1 }],
+    "upgraded": {
+      "effects": [
+        { "kind": "draw", "n": 1 },
+        { "kind": "gainEnergy", "n": 1 }
+      ]
+    },
+    "flavorIt": "Il cervello rettiliano non sbaglia mai."
+  },
+  {
+    "id": "colpo_di_coda",
+    "name": { "it": "Colpo di Coda" },
+    "cost": 1,
+    "type": "attack",
+    "rarity": "common",
+    "act": 1,
+    "tags": [],
+    "effects": [
+      { "kind": "damage", "amount": 5, "target": "enemy" },
+      { "kind": "block", "amount": 3 }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "damage", "amount": 7, "target": "enemy" },
+        { "kind": "block", "amount": 4 }
+      ]
+    }
+  },
+  {
+    "id": "adrenalina",
+    "name": { "it": "Adrenalina" },
+    "cost": 0,
+    "type": "skill",
+    "rarity": "uncommon",
+    "act": 1,
+    "tags": ["predatore"],
+    "effects": [
+      { "kind": "gainEnergy", "n": 1 },
+      { "kind": "draw", "n": 1 },
+      { "kind": "exhaust", "target": "self" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "gainEnergy", "n": 1 },
+        { "kind": "draw", "n": 2 },
+        { "kind": "exhaust", "target": "self" }
+      ]
+    },
+    "flavorIt": "Quando la vita è in pericolo, il corpo dà tutto."
+  },
+  {
+    "id": "morso_velenoso",
+    "name": { "it": "Morso Velenoso" },
+    "cost": 1,
+    "type": "attack",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["carnivoro", "spinosauride"],
+    "effects": [
+      { "kind": "damage", "amount": 5, "target": "enemy" },
+      { "kind": "applyStatus", "status": "poison", "stacks": 2, "target": "enemy" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "damage", "amount": 7, "target": "enemy" },
+        { "kind": "applyStatus", "status": "poison", "stacks": 3, "target": "enemy" }
+      ]
+    }
+  }
+]

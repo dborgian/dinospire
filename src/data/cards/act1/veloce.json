@@ -1,0 +1,160 @@
+[
+  {
+    "id": "beccata_v",
+    "name": { "it": "Beccata" },
+    "hero": "veloce",
+    "cost": 1,
+    "type": "attack",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["carnivoro", "dromeosauride"],
+    "effects": [{ "kind": "damage", "amount": 5, "target": "enemy" }],
+    "upgraded": { "effects": [{ "kind": "damage", "amount": 8, "target": "enemy" }] }
+  },
+  {
+    "id": "doppio_artiglio_v",
+    "name": { "it": "Doppio Artiglio" },
+    "hero": "veloce",
+    "cost": 1,
+    "type": "attack",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["carnivoro", "dromeosauride"],
+    "effects": [
+      { "kind": "repeat", "times": 2, "effect": { "kind": "damage", "amount": 4, "target": "enemy" } }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "repeat", "times": 3, "effect": { "kind": "damage", "amount": 4, "target": "enemy" } }
+      ]
+    }
+  },
+  {
+    "id": "scatto_v",
+    "name": { "it": "Scatto" },
+    "hero": "veloce",
+    "cost": 0,
+    "type": "skill",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["dromeosauride", "furtivo"],
+    "effects": [{ "kind": "draw", "n": 1 }],
+    "upgraded": { "effects": [{ "kind": "draw", "n": 2 }] }
+  },
+  {
+    "id": "branco_v",
+    "name": { "it": "Richiamo del Branco" },
+    "hero": "veloce",
+    "cost": 1,
+    "type": "skill",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["dromeosauride", "branco"],
+    "effects": [
+      { "kind": "addCardToDeck", "cardId": "compagno_neutro", "count": 2, "temporary": false }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "addCardToDeck", "cardId": "compagno_neutro", "count": 3, "temporary": false }
+      ]
+    }
+  },
+  {
+    "id": "sciame_compagni_v",
+    "name": { "it": "Sciame Compagni" },
+    "hero": "veloce",
+    "cost": 2,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["dromeosauride", "branco", "compagno"],
+    "effects": [{ "kind": "draw", "n": 2 }],
+    "upgraded": { "effects": [{ "kind": "draw", "n": 3 }] },
+    "flavorIt": "Insieme, il branco vede tutto."
+  },
+  {
+    "id": "coordinazione_branco_v",
+    "name": { "it": "Coordinazione del Branco" },
+    "hero": "veloce",
+    "cost": 1,
+    "type": "skill",
+    "rarity": "uncommon",
+    "act": 1,
+    "tags": ["dromeosauride", "branco", "predatore"],
+    "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 3, "target": "self" }],
+    "upgraded": { "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 4, "target": "self" }] },
+    "flavorIt": "Il branco si muove come un unico organismo."
+  },
+  {
+    "id": "predazione_multipla_v",
+    "name": { "it": "Predazione Multipla" },
+    "hero": "veloce",
+    "cost": 2,
+    "type": "attack",
+    "rarity": "uncommon",
+    "act": 1,
+    "tags": ["carnivoro", "dromeosauride", "predatore"],
+    "effects": [
+      { "kind": "repeat", "times": 3, "effect": { "kind": "damage", "amount": 5, "target": "enemy" } }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "repeat", "times": 3, "effect": { "kind": "damage", "amount": 7, "target": "enemy" } }
+      ]
+    },
+    "flavorIt": "Tre artigli, tre ferite, una vittoria."
+  },
+  {
+    "id": "fuga_tattica_v",
+    "name": { "it": "Fuga Tattica" },
+    "hero": "veloce",
+    "cost": 0,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["dromeosauride", "furtivo"],
+    "effects": [
+      { "kind": "block", "amount": 4 },
+      { "kind": "draw", "n": 1 }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "block", "amount": 6 },
+        { "kind": "draw", "n": 1 }
+      ]
+    }
+  },
+  {
+    "id": "compagno_alpha_v",
+    "name": { "it": "Compagno Alpha" },
+    "hero": "veloce",
+    "cost": 1,
+    "type": "power",
+    "rarity": "rare",
+    "act": 1,
+    "tags": ["dromeosauride", "branco", "compagno", "predatore"],
+    "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 2, "target": "self" }],
+    "upgraded": { "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 3, "target": "self" }] },
+    "flavorIt": "Il più forte del branco porta gli altri alla vittoria."
+  },
+  {
+    "id": "trappola_branco_v",
+    "name": { "it": "Trappola del Branco" },
+    "hero": "veloce",
+    "cost": 1,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["dromeosauride", "branco", "furtivo"],
+    "effects": [
+      { "kind": "applyStatus", "status": "vulnerable", "stacks": 2, "target": "enemy" },
+      { "kind": "applyStatus", "status": "weak", "stacks": 1, "target": "enemy" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "applyStatus", "status": "vulnerable", "stacks": 3, "target": "enemy" },
+        { "kind": "applyStatus", "status": "weak", "stacks": 2, "target": "enemy" }
+      ]
+    }
+  }
+]

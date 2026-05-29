@@ -1,0 +1,128 @@
+[
+  {
+    "id": "uovo_misterioso",
+    "title": "Uovo Misterioso",
+    "description": "Trovi un uovo enorme, pulsante di vita antica. Cosa fai?",
+    "choices": [
+      {
+        "label": "Apri l'uovo",
+        "description": "Potresti trovare qualcosa di prezioso... o di pericoloso.",
+        "outcomes": [
+          {
+            "description": "Una carta rara emerge dall'uovo!",
+            "effects": [],
+            "probability": 0.5
+          },
+          {
+            "description": "L'uovo esplode! Perdi 10 HP.",
+            "effects": [
+              { "kind": "damage", "amount": 10, "target": "self" }
+            ],
+            "probability": 0.5
+          }
+        ]
+      },
+      {
+        "label": "Lascialo stare",
+        "description": "Non vuoi rischiare.",
+        "outcomes": [
+          {
+            "description": "Prosegui prudentemente.",
+            "effects": [],
+            "probability": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pozza_catrame",
+    "title": "Pozza di Catrame",
+    "description": "Una pozza di catrame preistorico. Potente, ma pericoloso.",
+    "choices": [
+      {
+        "label": "Immergi una carta",
+        "description": "Potenzia una carta ma perdi una reliquia.",
+        "outcomes": [
+          {
+            "description": "La carta si potenzia, ma la reliquia sprofonda nel catrame.",
+            "effects": [],
+            "probability": 1
+          }
+        ]
+      },
+      {
+        "label": "Evita la pozza",
+        "description": "Meglio non rischiare.",
+        "outcomes": [
+          {
+            "description": "Continui sicuro.",
+            "effects": [],
+            "probability": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "branco_errante",
+    "title": "Branco Errante",
+    "description": "Un branco di giovani dinosauri ti segue. Vogliono unirsi alla tua avventura.",
+    "choices": [
+      {
+        "label": "Accoglili",
+        "description": "Aggiungi 2 Compagno al mazzo ma perdi 15 HP (fatica di gestirli).",
+        "outcomes": [
+          {
+            "description": "I Compagni si uniscono al tuo mazzo!",
+            "effects": [
+              { "kind": "addCardToDeck", "cardId": "compagno_neutro", "count": 2 },
+              { "kind": "damage", "amount": 15, "target": "self" }
+            ],
+            "probability": 1
+          }
+        ]
+      },
+      {
+        "label": "Lasciali andare",
+        "description": "Non puoi permetterti distrazioni.",
+        "outcomes": [
+          {
+            "description": "Il branco si disperde nella giungla.",
+            "effects": [],
+            "probability": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "roccia_cretacea",
+    "title": "Roccia Cretacea",
+    "description": "Una formazione rocciosa pulsante con l'energia dell'era Cretacea.",
+    "choices": [
+      {
+        "label": "Tocca la roccia",
+        "description": "Trasforma una carta in versione Cretacea potenziata.",
+        "outcomes": [
+          {
+            "description": "La carta si trasforma!",
+            "effects": [],
+            "probability": 1
+          }
+        ]
+      },
+      {
+        "label": "Passa oltre",
+        "description": "",
+        "outcomes": [
+          {
+            "description": "Prosegui.",
+            "effects": [],
+            "probability": 1
+          }
+        ]
+      }
+    ]
+  }
+]

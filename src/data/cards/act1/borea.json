@@ -1,0 +1,171 @@
+[
+  {
+    "id": "carica_b",
+    "name": { "it": "Carica Difensiva" },
+    "hero": "borea",
+    "cost": 1,
+    "type": "attack",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["erbivoro", "ankylosauro"],
+    "effects": [
+      { "kind": "damage", "amount": 4, "target": "enemy" },
+      { "kind": "block", "amount": 4 }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "damage", "amount": 6, "target": "enemy" },
+        { "kind": "block", "amount": 6 }
+      ]
+    }
+  },
+  {
+    "id": "corazza_b",
+    "name": { "it": "Corazza" },
+    "hero": "borea",
+    "cost": 1,
+    "type": "skill",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["erbivoro", "ankylosauro", "mandria"],
+    "effects": [{ "kind": "block", "amount": 7 }],
+    "upgraded": { "effects": [{ "kind": "block", "amount": 10 }] }
+  },
+  {
+    "id": "posizione_bassa_b",
+    "name": { "it": "Posizione Bassa" },
+    "hero": "borea",
+    "cost": 1,
+    "type": "skill",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["ankylosauro"],
+    "effects": [
+      { "kind": "block", "amount": 5 },
+      { "kind": "applyStatus", "status": "dodge", "stacks": 1, "target": "self" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "block", "amount": 7 },
+        { "kind": "applyStatus", "status": "dodge", "stacks": 2, "target": "self" }
+      ]
+    }
+  },
+  {
+    "id": "frantuma_ossa_b",
+    "name": { "it": "Frantuma-Ossa" },
+    "hero": "borea",
+    "cost": 2,
+    "type": "attack",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["erbivoro", "ankylosauro"],
+    "effects": [
+      { "kind": "damage", "amount": 10, "target": "enemy" },
+      { "kind": "applyStatus", "status": "vulnerable", "stacks": 2, "target": "enemy" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "damage", "amount": 13, "target": "enemy" },
+        { "kind": "applyStatus", "status": "vulnerable", "stacks": 2, "target": "enemy" }
+      ]
+    },
+    "flavorIt": "La clava caudale di Borea non lascia scampo."
+  },
+  {
+    "id": "placca_ossea_b",
+    "name": { "it": "Placca Ossea" },
+    "hero": "borea",
+    "cost": 1,
+    "type": "skill",
+    "rarity": "uncommon",
+    "act": 1,
+    "tags": ["ankylosauro", "mandria"],
+    "effects": [
+      { "kind": "block", "amount": 12 },
+      { "kind": "exhaust", "target": "self" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "block", "amount": 16 },
+        { "kind": "exhaust", "target": "self" }
+      ]
+    },
+    "flavorIt": "Uno scudo improvvisato dagli strati di osso dermal."
+  },
+  {
+    "id": "riflesso_corazza_b",
+    "name": { "it": "Riflesso Corazza" },
+    "hero": "borea",
+    "cost": 1,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["ankylosauro"],
+    "effects": [
+      { "kind": "block", "amount": 5 },
+      { "kind": "applyStatus", "status": "thorns", "stacks": 3, "target": "self" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "block", "amount": 7 },
+        { "kind": "applyStatus", "status": "thorns", "stacks": 5, "target": "self" }
+      ]
+    }
+  },
+  {
+    "id": "contrattacco_b",
+    "name": { "it": "Contrattacco" },
+    "hero": "borea",
+    "cost": 1,
+    "type": "attack",
+    "rarity": "uncommon",
+    "act": 1,
+    "tags": ["erbivoro", "ankylosauro"],
+    "effects": [
+      {
+        "kind": "conditional",
+        "if": { "op": "gte", "a": { "op": "stat", "stat": "dexterity" }, "b": { "op": "val", "v": 5 } },
+        "then": [{ "kind": "damage", "amount": 9, "target": "enemy" }],
+        "else": [{ "kind": "damage", "amount": 6, "target": "enemy" }]
+      }
+    ],
+    "upgraded": {
+      "effects": [
+        {
+          "kind": "conditional",
+          "if": { "op": "gte", "a": { "op": "stat", "stat": "dexterity" }, "b": { "op": "val", "v": 5 } },
+          "then": [{ "kind": "damage", "amount": 13, "target": "enemy" }],
+          "else": [{ "kind": "damage", "amount": 9, "target": "enemy" }]
+        }
+      ]
+    },
+    "flavorIt": "La difesa migliore è saper cogliere il momento."
+  },
+  {
+    "id": "fortezza_b",
+    "name": { "it": "Fortezza" },
+    "hero": "borea",
+    "cost": 3,
+    "type": "power",
+    "rarity": "rare",
+    "act": 1,
+    "tags": ["erbivoro", "ankylosauro", "mandria"],
+    "effects": [{ "kind": "applyStatus", "status": "thorns", "stacks": 2, "target": "self" }],
+    "upgraded": { "effects": [{ "kind": "applyStatus", "status": "thorns", "stacks": 4, "target": "self" }] },
+    "flavorIt": "Borea diventa un muro invalicabile. Il block non cede. Il nemico sì."
+  },
+  {
+    "id": "passo_pesante_b",
+    "name": { "it": "Passo Pesante" },
+    "hero": "borea",
+    "cost": 0,
+    "type": "attack",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["erbivoro", "ankylosauro"],
+    "effects": [{ "kind": "damage", "amount": 3, "target": "all_enemies" }],
+    "upgraded": { "effects": [{ "kind": "damage", "amount": 5, "target": "all_enemies" }] },
+    "flavorIt": "Ogni passo di Borea fa tremare la terra."
+  }
+]

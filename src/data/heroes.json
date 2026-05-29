@@ -1,0 +1,128 @@
+[
+  {
+    "id": "rex",
+    "name": { "it": "Rex" },
+    "taxonGroup": "theropode",
+    "diet": "carnivoro",
+    "era": "cretaceo",
+    "art": { "phylopicUuid": "1a896840-3a44-4f96-b563-d0a9e9b0e74e" },
+    "stages": {
+      "cucciolo": {
+        "hp": 80,
+        "energyPerTurn": 3,
+        "handSize": 5,
+        "passiveDescription": "La prima Attack ogni turno infligge +3 danno se costa ≥2⚡",
+        "abilityKeys": ["apex_bite"]
+      },
+      "adulto": {
+        "hp": 104,
+        "energyPerTurn": 3,
+        "handSize": 5,
+        "passiveDescription": "La prima Attack ogni turno infligge +5 danno se costa ≥2⚡",
+        "abilityKeys": ["apex_bite", "territorial"]
+      },
+      "prime": {
+        "hp": 120,
+        "energyPerTurn": 3,
+        "handSize": 5,
+        "passiveDescription": "La prima Attack ogni turno infligge +8 danno se costa ≥2⚡. Le Attack rare costano 1⚡ in meno.",
+        "abilityKeys": ["apex_bite", "territorial", "tyrant_roar"]
+      }
+    },
+    "starterDeck": [
+      "morso_r", "morso_r", "morso_r", "morso_r", "morso_r",
+      "affondo_r",
+      "coda_spazzante_r", "coda_spazzante_r", "coda_spazzante_r",
+      "ruggito_r"
+    ],
+    "starterRelic": "dente_spezzato",
+    "primeConditions": [
+      "Sconfitto elite carnivoro",
+      "2+ Power nel mazzo a fine atto",
+      "HP ≥50% a fine atto"
+    ]
+  },
+  {
+    "id": "veloce",
+    "name": { "it": "Veloce" },
+    "taxonGroup": "dromeosauride",
+    "diet": "carnivoro",
+    "era": "cretaceo",
+    "art": { "phylopicUuid": "f3d8ceab-c8c8-4edd-8c27-9d0b2a88d2ac" },
+    "stages": {
+      "cucciolo": {
+        "hp": 70,
+        "energyPerTurn": 3,
+        "handSize": 5,
+        "passiveDescription": "Ogni 3ª carta giocata nel turno infligge 4 danni a tutti i nemici",
+        "abilityKeys": ["pack_tactics"]
+      },
+      "adulto": {
+        "hp": 91,
+        "energyPerTurn": 3,
+        "handSize": 5,
+        "passiveDescription": "Ogni 3ª carta giocata infligge 6 danni a tutti i nemici",
+        "abilityKeys": ["pack_tactics", "blitz_strike"]
+      },
+      "prime": {
+        "hp": 105,
+        "energyPerTurn": 3,
+        "handSize": 6,
+        "passiveDescription": "Ogni 3ª carta infligge 8 danni. Peschi 1 carta extra quando attivi la passiva.",
+        "abilityKeys": ["pack_tactics", "blitz_strike", "alpha_coordination"]
+      }
+    },
+    "starterDeck": [
+      "beccata_v", "beccata_v", "beccata_v", "beccata_v", "beccata_v",
+      "doppio_artiglio_v", "doppio_artiglio_v",
+      "scatto_v", "scatto_v",
+      "branco_v"
+    ],
+    "starterRelic": "piuma_antica",
+    "primeConditions": [
+      "5+ carte Branco/Compagno nel mazzo",
+      "Boss atto 2 sconfitto entro turno 8"
+    ]
+  },
+  {
+    "id": "borea",
+    "name": { "it": "Borea" },
+    "taxonGroup": "ankylosauro",
+    "diet": "erbivoro",
+    "era": "cretaceo",
+    "art": { "phylopicUuid": "8f63ad89-e6a5-4174-b170-97e92d81c1a4" },
+    "stages": {
+      "cucciolo": {
+        "hp": 78,
+        "energyPerTurn": 3,
+        "handSize": 5,
+        "passiveDescription": "+4 block a inizio combat. Il 50% del block residuo a fine turno viene mantenuto.",
+        "abilityKeys": ["osteoderm"]
+      },
+      "adulto": {
+        "hp": 101,
+        "energyPerTurn": 3,
+        "handSize": 5,
+        "passiveDescription": "+6 block a inizio combat. Il 50% del block residuo viene mantenuto.",
+        "abilityKeys": ["osteoderm", "shell_counter"]
+      },
+      "prime": {
+        "hp": 117,
+        "energyPerTurn": 3,
+        "handSize": 5,
+        "passiveDescription": "+8 block a inizio combat. Il 50% del block viene mantenuto. Le Skill costano 0⚡ al primo turno.",
+        "abilityKeys": ["osteoderm", "shell_counter", "bastion_stance"]
+      }
+    },
+    "starterDeck": [
+      "carica_b", "carica_b", "carica_b", "carica_b", "carica_b",
+      "corazza_b", "corazza_b", "corazza_b",
+      "posizione_bassa_b", "posizione_bassa_b"
+    ],
+    "starterRelic": "scaglia_madre",
+    "primeConditions": [
+      "Block totale accumulato nella run ≥150",
+      "0 compagni persi in eventi"
+    ]
+  }
+]

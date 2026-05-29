@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --color-amber-400: #fbbf24;
+  --color-amber-300: #fcd34d;
+  --color-amber-500: #f59e0b;
+  --color-amber-900: #78350f;
+  --font-display: "Cinzel", serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+}

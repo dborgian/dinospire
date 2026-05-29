@@ -1,0 +1,184 @@
+[
+  {
+    "id": "compy_sciame",
+    "name": { "it": "Sciame di Compy" },
+    "taxonGroup": "dromeosauride",
+    "diet": "carnivoro",
+    "hp": 14,
+    "tier": "normal",
+    "art": { "phylopicUuid": "" },
+    "movePattern": "sequential",
+    "moves": [
+      {
+        "id": "morso1",
+        "intent": { "type": "attack", "value": 4, "description": "Morde per 4" },
+        "effects": [
+          { "kind": "damage", "amount": 4, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "morso2",
+        "intent": { "type": "attack", "value": 4, "description": "Morde per 4" },
+        "effects": [
+          { "kind": "damage", "amount": 4, "target": "enemy" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dilophosaurus",
+    "name": { "it": "Dilofosauro" },
+    "taxonGroup": "theropode",
+    "diet": "carnivoro",
+    "hp": 28,
+    "tier": "normal",
+    "art": { "phylopicUuid": "" },
+    "movePattern": "sequential",
+    "moves": [
+      {
+        "id": "sputo",
+        "intent": { "type": "debuff", "value": 2, "description": "Sputa veleno: 3 danni + 2 Veleno" },
+        "effects": [
+          { "kind": "damage", "amount": 3, "target": "enemy" },
+          { "kind": "applyStatus", "status": "poison", "stacks": 2, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "morso",
+        "intent": { "type": "attack", "value": 8, "description": "Morde per 8" },
+        "effects": [
+          { "kind": "damage", "amount": 8, "target": "enemy" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pachycephalosaurus",
+    "name": { "it": "Pachicefalosauro" },
+    "taxonGroup": "pachicefalosauro",
+    "diet": "erbivoro",
+    "hp": 34,
+    "tier": "normal",
+    "art": { "phylopicUuid": "" },
+    "movePattern": "sequential",
+    "moves": [
+      {
+        "id": "preparazione",
+        "intent": { "type": "buff", "description": "Si prepara: +3 Forza" },
+        "effects": [
+          { "kind": "applyStatus", "status": "strength", "stacks": 3, "target": "self" }
+        ]
+      },
+      {
+        "id": "testata",
+        "intent": { "type": "attack", "value": 9, "description": "Testata per 9" },
+        "effects": [
+          { "kind": "damage", "amount": 9, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "testata2",
+        "intent": { "type": "attack", "value": 9, "description": "Testata per 9" },
+        "effects": [
+          { "kind": "damage", "amount": 9, "target": "enemy" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "triceratops_giovane",
+    "name": { "it": "Triceratopo Giovane" },
+    "taxonGroup": "ceratopside",
+    "diet": "erbivoro",
+    "hp": 42,
+    "tier": "normal",
+    "art": { "phylopicUuid": "" },
+    "movePattern": "sequential",
+    "moves": [
+      {
+        "id": "difesa",
+        "intent": { "type": "defend", "value": 10, "description": "Si difende: 10 block" },
+        "effects": [
+          { "kind": "block", "amount": 10 }
+        ]
+      },
+      {
+        "id": "carica",
+        "intent": { "type": "attack", "value": 12, "description": "Carica per 12" },
+        "effects": [
+          { "kind": "damage", "amount": 12, "target": "enemy" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "utahraptor_coppia",
+    "name": { "it": "Utahraptor (coppia)" },
+    "taxonGroup": "dromeosauride",
+    "diet": "carnivoro",
+    "hp": 30,
+    "tier": "elite",
+    "art": { "phylopicUuid": "" },
+    "movePattern": "sequential",
+    "moves": [
+      {
+        "id": "branco_combo",
+        "intent": { "type": "attack", "value": 9, "description": "Attacco di branco: 3+3+3" },
+        "effects": [
+          {
+            "kind": "repeat",
+            "times": 3,
+            "effect": { "kind": "damage", "amount": 3, "target": "enemy" }
+          }
+        ]
+      },
+      {
+        "id": "mordi_fuggi",
+        "intent": { "type": "attack", "value": 11, "description": "Mordi e fuggi: 6+5 block" },
+        "effects": [
+          { "kind": "damage", "amount": 6, "target": "enemy" },
+          { "kind": "block", "amount": 5 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "carnotaurus_boss",
+    "name": { "it": "Carnotaurus — Predatore Furtivo" },
+    "taxonGroup": "theropode",
+    "diet": "carnivoro",
+    "hp": 95,
+    "tier": "boss",
+    "art": { "phylopicUuid": "" },
+    "movePattern": "sequential",
+    "moves": [
+      {
+        "id": "agguato",
+        "intent": { "type": "unknown", "hidden": true, "description": "???" },
+        "effects": [
+          { "kind": "damage", "amount": 14, "target": "enemy" },
+          { "kind": "applyStatus", "status": "dodge", "stacks": 1, "target": "self" }
+        ]
+      },
+      {
+        "id": "squarcio",
+        "intent": { "type": "attack", "value": 16, "description": "Squarcio: 8+8" },
+        "effects": [
+          {
+            "kind": "repeat",
+            "times": 2,
+            "effect": { "kind": "damage", "amount": 8, "target": "enemy" }
+          }
+        ]
+      },
+      {
+        "id": "ruggito_intimidatorio",
+        "intent": { "type": "debuff", "description": "Ruggito: 2 Debole + 2 Vulnerabile" },
+        "effects": [
+          { "kind": "applyStatus", "status": "weak", "stacks": 2, "target": "enemy" },
+          { "kind": "applyStatus", "status": "vulnerable", "stacks": 2, "target": "enemy" }
+        ]
+      }
+    ]
+  }
+]
