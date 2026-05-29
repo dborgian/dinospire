@@ -54,14 +54,17 @@ function DamageNumber({ amount, isBlock = false, id }: DamageNumberProps) {
   return (
     <motion.span
       key={id}
-      initial={{ y: 0, opacity: 1 }}
-      animate={prefersReduced ? { opacity: 0 } : { y: -48, opacity: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      initial={{ y: 0, opacity: 1, scale: 1.2 }}
+      animate={prefersReduced ? { opacity: 0 } : { y: -60, opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
       className={[
         "absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none",
-        "text-lg font-black drop-shadow-lg select-none z-30",
-        isBlock ? "text-blue-400" : "text-red-400",
+        "text-2xl font-black select-none z-30",
+        isBlock
+          ? "text-blue-300 drop-shadow-[0_0_8px_rgba(147,197,253,0.9)]"
+          : "text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.9)]",
       ].join(" ")}
+      style={{ textShadow: isBlock ? "0 0 12px #93c5fd" : "0 0 12px #f87171" }}
       aria-hidden="true"
     >
       {isBlock ? "+" : "-"}{amount}
@@ -149,11 +152,11 @@ function EnemyCard({ enemy, onClick, isPulsing, isShaking }: EnemyCardProps) {
         onClick={onClick}
         className={[
           "relative flex flex-col items-center gap-2 px-4 py-3 rounded-xl",
-          "bg-stone-800 border-2 transition-all duration-150",
+          "bg-stone-900/80 backdrop-blur border-2 transition-all duration-150",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400",
           isPulsing
-            ? "border-amber-400 shadow-lg shadow-amber-500/40 animate-pulse"
-            : "border-stone-600 hover:border-stone-400",
+            ? "border-amber-400 shadow-[0_0_24px_rgba(251,191,36,0.5)] animate-pulse"
+            : "border-stone-700 hover:border-stone-500 shadow-lg shadow-black/40",
           enemy.hp <= 0 ? "opacity-30 pointer-events-none" : "",
         ].join(" ")}
         aria-label={`Nemico: HP ${enemy.hp}/${enemy.maxHp}. Clicca per selezionare come bersaglio.`}
@@ -286,6 +289,12 @@ export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", go
   const [floatNums, setFloatNums] = useState<FloatNum[]>([]);
   const floatCounter = useRef(0);
 
+  // Hero damage flash
+  const [heroFlash, setHeroFlash] = useState(false);
+  // Hero floating damage numbers
+  interface HeroFloat { id: number; amount: number }
+  const [heroFloatNums, setHeroFloatNums] = useState<HeroFloat[]>([]);
+
   // Pile preview state
   const [pilePreview, setPilePreview] = useState<"draw" | "discard" | null>(null);
   const [enemyTurnBanner, setEnemyTurnBanner] = useState(false);
@@ -321,14 +330,24 @@ export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", go
 
     for (const evt of newEvents) {
       if (evt.kind === "damage_dealt") {
-        const targetId = evt.payload["targetId"] as EnemyId | undefined;
-        const amount = evt.payload["amount"] as number | undefined;
-        if (targetId && typeof amount === "number" && amount > 0) {
+        const targetId = evt.payload["targetId"] as string | undefined;
+        const finalDmg = (evt.payload["finalDmg"] ?? evt.payload["amount"]) as number | undefined;
+        const actorIsHero = evt.payload["actorIsHero"] as boolean | undefined;
+
+        if (typeof finalDmg === "number" && finalDmg > 0) {
           const numId = ++floatCounter.current;
-          setFloatNums((prev) => [...prev, { id: numId, amount, isBlock: false, enemyIid: targetId }]);
-          setTimeout(() => {
-            setFloatNums((prev) => prev.filter((n) => n.id !== numId));
-          }, 700);
+
+          if (targetId === "hero" || actorIsHero === false) {
+            // Enemy hit the hero
+            setHeroFlash(true);
+            setTimeout(() => setHeroFlash(false), 400);
+            setHeroFloatNums((prev) => [...prev, { id: numId, amount: finalDmg }]);
+            setTimeout(() => setHeroFloatNums((prev) => prev.filter((n) => n.id !== numId)), 800);
+          } else if (targetId) {
+            // Hero hit an enemy
+            setFloatNums((prev) => [...prev, { id: numId, amount: finalDmg, isBlock: false, enemyIid: targetId as EnemyId }]);
+            setTimeout(() => setFloatNums((prev) => prev.filter((n) => n.id !== numId)), 800);
+          }
         }
       }
     }
@@ -429,10 +448,38 @@ export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", go
   ) ?? false;
 
   return (
-    <div className="flex flex-col h-screen bg-stone-950 text-stone-100 overflow-hidden" role="main">
+    <div
+      className="flex flex-col h-screen text-stone-100 overflow-hidden relative"
+      role="main"
+      style={{
+        background: "radial-gradient(ellipse 80% 60% at 50% 20%, #1a2e1a 0%, #0d1f0d 40%, #0a0f0a 100%)",
+      }}
+    >
+      {/* Atmospheric fog layer */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{
+          background: "radial-gradient(ellipse 60% 40% at 50% 35%, rgba(30,60,20,0.35) 0%, transparent 70%), radial-gradient(ellipse 100% 50% at 50% 100%, rgba(0,0,0,0.6) 0%, transparent 60%)",
+        }}
+        aria-hidden="true"
+      />
+      {/* Hero damage flash overlay */}
+      <AnimatePresence>
+        {heroFlash && (
+          <motion.div
+            initial={{ opacity: 0.5 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="absolute inset-0 pointer-events-none z-20 border-4 border-red-500"
+            style={{ boxShadow: "inset 0 0 60px rgba(239,68,68,0.5)" }}
+            aria-hidden="true"
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Header ── */}
-      <header className="flex items-center justify-between px-4 py-2 bg-stone-900 border-b border-stone-800 shrink-0">
+      <header className="relative z-10 flex items-center justify-between px-4 py-2 bg-stone-950/70 backdrop-blur border-b border-stone-800/60 shrink-0">
         <span className="text-xs text-stone-400 font-semibold tracking-wide">{floorLabel}</span>
         <div className="flex items-center gap-3">
           <span className="text-xs text-amber-400 font-bold" aria-label={`Oro: ${gold}`}>💰 {gold}</span>
@@ -466,7 +513,7 @@ export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", go
 
       {/* ── Enemy area (top ~40%) ── */}
       <section
-        className="flex-1 flex items-center justify-center gap-6 px-4 py-4"
+        className="relative z-10 flex-1 flex items-center justify-center gap-6 px-4 py-4"
         aria-label="Area nemici"
       >
         {liveEnemies.map((enemy) => (
@@ -493,7 +540,23 @@ export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", go
       </section>
 
       {/* ── Hero stats bar ── */}
-      <div className="flex items-center justify-between px-4 py-2 bg-stone-900 border-t border-stone-800 shrink-0">
+      <div className="relative z-10 flex items-center justify-between px-4 py-2 bg-stone-950/80 backdrop-blur border-t border-stone-800/60 shrink-0">
+        {/* Hero floating damage numbers */}
+        <AnimatePresence>
+          {heroFloatNums.map((n) => (
+            <motion.span
+              key={n.id}
+              initial={{ y: 0, opacity: 1, scale: 1.3 }}
+              animate={{ y: -50, opacity: 0, scale: 1 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="absolute left-8 top-0 pointer-events-none text-2xl font-black text-red-400 select-none z-30"
+              style={{ textShadow: "0 0 14px #f87171" }}
+              aria-hidden="true"
+            >
+              -{n.amount}
+            </motion.span>
+          ))}
+        </AnimatePresence>
         {/* HP */}
         <div className="flex flex-col gap-0.5 min-w-[80px]">
           <div className="flex items-center gap-1.5 text-sm">
@@ -555,7 +618,7 @@ export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", go
       </div>
 
       {/* ── Hand area (bottom ~40%) ── */}
-      <div className="shrink-0 bg-stone-950 border-t border-stone-800 pt-2">
+      <div className="relative z-10 shrink-0 bg-stone-950/80 backdrop-blur border-t border-stone-800/60 pt-2">
         <HandArea
           cardInstances={handInstances}
           cardDefs={cardDefs}
