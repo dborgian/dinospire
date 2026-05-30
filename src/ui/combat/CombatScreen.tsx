@@ -206,9 +206,11 @@ function EnemyCard({ enemy, onClick, isPulsing, isShaking, isEnemyTurn }: EnemyC
             ? `Attacca ${enemy.nextIntent.value}`
             : enemy.nextIntent.type === "defend" && enemy.nextIntent.value !== undefined
             ? `Difende +${enemy.nextIntent.value}`
-            : enemy.nextIntent.type === "buff" ? "Si potenzia"
-            : enemy.nextIntent.type === "debuff" ? "Ti indebolisce"
-            : "???"}
+            : enemy.nextIntent.type === "unknown"
+            ? "???"
+            : enemy.nextIntent.description ?? (
+                enemy.nextIntent.type === "buff" ? "Si potenzia" : "Ti indebolisce"
+              )}
         </span>
       </motion.div>
 
