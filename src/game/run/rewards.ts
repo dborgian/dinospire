@@ -4,6 +4,8 @@
 
 import type { Reward, CardId, RelicId, HeroId, NodeType } from '@/game/types';
 import type { SeededRng } from '@/game/rng';
+import { rewardCardBonus } from '@/game/combat/relics';
+import { contentRegistry } from '@/game/content/index';
 
 // ---------------------------------------------------------------------------
 // Card rewards
@@ -21,12 +23,6 @@ export function generateCardRewards(
   rng: SeededRng,
   count = 3,
 ): CardId[] {
-  // In a fully data-driven build this would pull from the loaded card registry.
-  // Until the card JSON for each act is wired, we return an empty pool rather
-  // than crashing — callers should check the pool before offering rewards.
-  void act;
-  void heroId;
-
   const deckSet = new Set(deckCardIds);
   const pool: CardId[] = getActCardPool(act, heroId).filter((id) => !deckSet.has(id));
 
@@ -45,14 +41,14 @@ export function generateCardRewards(
 }
 
 /**
- * Synchronous pool access — returns card ids known for the act/hero combination.
- * This is the integration point for the content registry; swap in a real lookup
- * once card JSON files are loaded.
+ * Synchronous card pool — filters the already-loaded contentRegistry.
+ * CombatWrapper calls loadCards(act) before mounting, so the registry is
+ * populated by the time a reward screen is shown.
  */
-function getActCardPool(_act: 1 | 2 | 3, _heroId: HeroId): CardId[] {
-  // TODO: replace with `[...contentRegistry.cards.values()].filter(c => c.act === act ...)`
-  // once card JSON data files are available and loaded via loadCards().
-  return [];
+function getActCardPool(act: 1 | 2 | 3, heroId: HeroId): CardId[] {
+  return [...contentRegistry.cards.values()]
+    .filter((c) => c.act === act && (c.hero === heroId || !c.hero) && c.rarity !== 'starter')
+    .map((c) => c.id);
 }
 
 // ---------------------------------------------------------------------------
@@ -87,6 +83,8 @@ export interface RewardContext {
   readonly deckCardIds: CardId[];
   readonly relicPool: readonly RelicId[];
   readonly ascensionLevel: number;
+  /** Relics the hero already owns — used to apply pool modifiers (cranio_fossile). */
+  readonly ownedRelics?: readonly RelicId[];
 }
 
 /**
@@ -110,7 +108,9 @@ export function buildRewardPool(ctx: RewardContext, rng: SeededRng): Reward[] {
 
   // Cards (boss nodes skip card rewards — they give a relic directly)
   if (ctx.nodeType !== 'boss') {
-    const cardCount = ctx.ascensionLevel >= 1 ? 2 : 3;
+    const baseCount = ctx.ascensionLevel >= 1 ? 2 : 3;
+    const bonus = ctx.ownedRelics ? rewardCardBonus(ctx.ownedRelics) : 0;
+    const cardCount = baseCount + bonus;
     const cardIds = generateCardRewards(ctx.act, ctx.heroId, ctx.deckCardIds, rng, cardCount);
     for (const cardId of cardIds) {
       rewards.push({ kind: 'card', cardId });

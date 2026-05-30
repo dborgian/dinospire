@@ -100,7 +100,8 @@ function makeTestState(overrides: Partial<CombatState> = {}): CombatState {
       energyMax: 3,
           handSize: 5,
       statuses: {},
-      relicCounters: {} as Record<RelicId, number>,
+      relics: [] as RelicId[],
+          relicCounters: {} as Record<RelicId, number>,
     },
     enemies: [],
     piles: {
@@ -323,6 +324,7 @@ describe('combatReducer', () => {
           hp: 75, maxHp: 75, block: 0, energy: 3, energyMax: 3,
           handSize: 5,
           statuses: { weak: 2 },
+          relics: [] as RelicId[],
           relicCounters: {} as Record<RelicId, number>,
         },
         enemies: [makeEnemy('e1')],
@@ -344,6 +346,7 @@ describe('combatReducer', () => {
           hp: 75, maxHp: 75, block: 0, energy: 3, energyMax: 3,
           handSize: 5,
           statuses: { strength: 3 },
+          relics: [] as RelicId[],
           relicCounters: {} as Record<RelicId, number>,
         },
         enemies: [makeEnemy('e1')],
@@ -365,6 +368,7 @@ describe('combatReducer', () => {
           hp: 75, maxHp: 75, block: 0, energy: 3, energyMax: 3,
           handSize: 5,
           statuses: { vigor: 4 },
+          relics: [] as RelicId[],
           relicCounters: {} as Record<RelicId, number>,
         },
         enemies: [makeEnemy('e1')],
@@ -387,6 +391,7 @@ describe('combatReducer', () => {
           hp: 75, maxHp: 75, block: 0, energy: 1, energyMax: 3,
           handSize: 5,
           statuses: {},
+          relics: [] as RelicId[],
           relicCounters: {} as Record<RelicId, number>,
         },
         cardInstances: { expensiveCard: ci } as Record<CardInstanceId, CardInstance>,
@@ -467,6 +472,7 @@ describe('combatReducer', () => {
           hp: 75, maxHp: 75, block: 0, energy: 3, energyMax: 3,
           handSize: 5,
           statuses: { dexterity: 3 },
+          relics: [] as RelicId[],
           relicCounters: {} as Record<RelicId, number>,
         },
       });
@@ -484,6 +490,7 @@ describe('combatReducer', () => {
           hp: 75, maxHp: 75, block: 0, energy: 3, energyMax: 3,
           handSize: 5,
           statuses: { frail: 1 },
+          relics: [] as RelicId[],
           relicCounters: {} as Record<RelicId, number>,
         },
       });
@@ -538,6 +545,7 @@ describe('combatReducer', () => {
           hp: 75, maxHp: 75, block: 15, energy: 3, energyMax: 3,
           handSize: 5,
           statuses: {},
+          relics: [] as RelicId[],
           relicCounters: {} as Record<RelicId, number>,
         },
       });
@@ -551,6 +559,7 @@ describe('combatReducer', () => {
           hp: 75, maxHp: 75, block: 0, energy: 0, energyMax: 3,
           handSize: 5,
           statuses: {},
+          relics: [] as RelicId[],
           relicCounters: {} as Record<RelicId, number>,
         },
       });
@@ -622,6 +631,7 @@ describe('combatReducer', () => {
           hp: 75, maxHp: 75, block: 10, energy: 3, energyMax: 3,
           handSize: 5,
           statuses: {},
+          relics: [] as RelicId[],
           relicCounters: {} as Record<RelicId, number>,
         },
         enemies: [enemy],
@@ -900,6 +910,7 @@ describe('combatReducer', () => {
           hp: 75, maxHp: 75, block: 0, energy: 5, energyMax: 3,
           handSize: 5,
           statuses: {},
+          relics: [] as RelicId[],
           relicCounters: {} as Record<RelicId, number>,
         },
       });
@@ -916,6 +927,7 @@ describe('combatReducer', () => {
           hp: 50, maxHp: 75, block: 0, energy: 3, energyMax: 3,
           handSize: 5,
           statuses: {},
+          relics: [] as RelicId[],
           relicCounters: {} as Record<RelicId, number>,
         },
       });
@@ -929,6 +941,7 @@ describe('combatReducer', () => {
           hp: 50, maxHp: 75, block: 0, energy: 3, energyMax: 3,
           handSize: 5,
           statuses: {},
+          relics: [] as RelicId[],
           relicCounters: {} as Record<RelicId, number>,
         },
       });

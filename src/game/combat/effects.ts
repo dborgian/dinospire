@@ -16,6 +16,13 @@ import type {
   StatusKey,
 } from '../types';
 import { createSeededRng } from '../rng';
+import {
+  blockBonusFromRelics,
+  consumeAmbraPredatoria,
+  dotMultiplier,
+  fireRelicTrigger,
+  shouldDoubleFirstAttack,
+} from './relics';
 
 // ---------------------------------------------------------------------------
 // DynExpr evaluator
@@ -384,11 +391,19 @@ function resolveEffect(
   switch (effect.kind) {
     // ------------------------------------------------------------------
     case 'damage': {
-      const base = evalExpr(effect.amount, state, actorIsHero, targetId);
+      let base = evalExpr(effect.amount, state, actorIsHero, targetId);
+
+      // Relic: ambra_predatoria — first hero attack of combat is doubled.
+      // We consume the counter as soon as we observe the first eligible attack.
+      let stateAfterRelicConsume = state;
+      if (actorIsHero && shouldDoubleFirstAttack(state)) {
+        base = base * 2;
+        stateAfterRelicConsume = consumeAmbraPredatoria(state);
+      }
 
       const attackerStatuses = actorIsHero
-        ? state.hero.statuses
-        : findEnemy(state, targetId ?? ('' as EnemyId))?.statuses ?? {};
+        ? stateAfterRelicConsume.hero.statuses
+        : findEnemy(stateAfterRelicConsume, targetId ?? ('' as EnemyId))?.statuses ?? {};
 
       const { damage, consumeVigor } = computeOutgoingDamage(base, attackerStatuses);
 
@@ -396,14 +411,14 @@ function resolveEffect(
       let s = consumeVigor
         ? actorIsHero
           ? {
-              ...state,
-              hero: { ...state.hero, statuses: { ...state.hero.statuses, vigor: 0 } },
+              ...stateAfterRelicConsume,
+              hero: { ...stateAfterRelicConsume.hero, statuses: { ...stateAfterRelicConsume.hero.statuses, vigor: 0 } },
             }
-          : updateEnemy(state, targetId ?? ('' as EnemyId), (e) => ({
+          : updateEnemy(stateAfterRelicConsume, targetId ?? ('' as EnemyId), (e) => ({
               ...e,
               statuses: { ...e.statuses, vigor: 0 },
             }))
-        : state;
+        : stateAfterRelicConsume;
 
       const resolveForTarget = (
         s2: CombatState,
@@ -434,7 +449,7 @@ function resolveEffect(
           next = logEvent(next, 'thorns', { thornsDmg: thorns });
         }
 
-        return logEvent(next, 'damage', {
+        next = logEvent(next, 'damage', {
           actorIsHero,
           targetId: tid,
           baseDmg: base,
@@ -442,6 +457,14 @@ function resolveEffect(
           hpAfter: hp,
           blockAfter: block,
         });
+
+        // on_kill — hero just dropped an enemy to 0 HP. Fires relics like
+        // zanna_del_re (+1 strength per kill, capped at counterMax).
+        if (actorIsHero && hp === 0 && enemy.hp > 0) {
+          next = fireRelicTrigger(next, 'on_kill');
+        }
+
+        return next;
       };
 
       if (effect.target === 'all_enemies') {
@@ -517,7 +540,10 @@ function resolveEffect(
 
     // ------------------------------------------------------------------
     case 'block': {
-      const base = evalExpr(effect.amount, state, actorIsHero, targetId);
+      let base = evalExpr(effect.amount, state, actorIsHero, targetId);
+
+      // Relic: scaglia_madre — +3 to every hero block source (before frail/dex).
+      if (actorIsHero) base += blockBonusFromRelics(state);
 
       if (!actorIsHero && targetId) {
         // Enemy gaining block from its own move — route to the enemy, no frail/dex modifiers
@@ -790,15 +816,18 @@ export function tickStatusDamageOnHero(
   const stacks = state.hero.statuses[status] ?? 0;
   if (stacks <= 0) return state;
 
+  // Relic: pelle_resistente — DoT damage to the hero is reduced by 25%.
+  const incoming = Math.max(0, Math.floor(stacks * dotMultiplier(state)));
+
   let s: CombatState = {
     ...state,
     hero: {
       ...state.hero,
-      hp: Math.max(0, state.hero.hp - stacks),
+      hp: Math.max(0, state.hero.hp - incoming),
     },
   };
 
-  s = logEvent(s, 'status_tick', { status, stacks, target: 'hero', hpAfter: s.hero.hp });
+  s = logEvent(s, 'status_tick', { status, stacks, damage: incoming, target: 'hero', hpAfter: s.hero.hp });
 
   // Poison and burn both decrement by 1 after dealing damage (min 0).
   // Bleed does NOT auto-decay — it persists until end of combat or cleansed.

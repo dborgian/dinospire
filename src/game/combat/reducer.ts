@@ -139,7 +139,8 @@ function handleStart(
       energyMax: heroStats.energyMax,
       handSize: heroStats.handSize,
       statuses: {},
-      relicCounters: {} as Record<RelicId, number>,
+      relics: prev.hero?.relics ?? [],
+      relicCounters: prev.hero?.relicCounters ?? {},
     },
     enemies: enemies.map((e) => ({
       ...e,

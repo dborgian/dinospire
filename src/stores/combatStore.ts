@@ -6,6 +6,7 @@ import { combatReducer, checkCombatOver } from "@/game/combat/reducer";
 import { applyEffects, tickStatusDamageOnHero } from "@/game/combat/effects";
 import { canPlayCard } from "@/game/combat/selectors";
 import { contentRegistry } from "@/game/content/index";
+import { fireRelicTrigger } from "@/game/combat/relics";
 
 /**
  * Build a Map<CardInstanceId, CardTag[]> by joining every live card instance
@@ -146,7 +147,9 @@ export const useCombatStore = create<CombatStore>()(
 
       initCombat(combat) {
         set((state) => {
-          state.combat = combat;
+          // Apply on_battle_start relic effects after the combat shell is ready
+          // so the opening hand / energy / strength buffs reflect them.
+          state.combat = fireRelicTrigger(combat, 'on_battle_start');
         });
       },
 

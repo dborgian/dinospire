@@ -2,9 +2,9 @@
   {
     "id": "dente_spezzato",
     "name": { "it": "Dente Spezzato" },
-    "description": "+1 danno su tutte le Attack.",
+    "description": "Inizi ogni combat con +1 Forza.",
     "tier": "starter",
-    "trigger": "on_attack",
+    "trigger": "on_battle_start",
     "effects": [
       { "kind": "applyStatus", "status": "strength", "stacks": 1, "target": "self" }
     ],

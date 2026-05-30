@@ -20,6 +20,7 @@ import type {
 } from '@/game/types';
 import { generateActMap } from './map';
 import { createSeededRng } from '@/game/rng';
+import { applyRelicEquipEffects } from '@/game/combat/relics';
 
 // ---------------------------------------------------------------------------
 // Event-only relic pool — pickable via `gainRelic` outcomes when no specific
@@ -48,6 +49,7 @@ export type RunAction =
   | { type: 'COMBAT_VICTORY'; rewards: Reward[]; statsDelta: Partial<RunStats>; heroHpAfter: number }
   | { type: 'COMBAT_DEFEAT'; heroHpAfter: number }
   | { type: 'PICK_REWARD'; reward: Reward | null }
+  | { type: 'PICK_BOSS_REWARD'; relicId: RelicId | null }
   | { type: 'RESOLVE_EVENT'; choiceIndex: number; outcomes: CardEffect[] }
   | { type: 'REST_HEAL' }
   | { type: 'REST_UPGRADE'; cardIid: CardInstanceId }
@@ -98,6 +100,15 @@ function buildInitialRun(
   };
 }
 
+/**
+ * Apply equip-time relic effects (cuore_di_pietra +8 maxHp, uovo_del_primo
+ * free evolution). Centralized so START_RUN and reward/event grants stay in
+ * sync.
+ */
+function withRelicEquip(run: RunState, relicId: RelicId): RunState {
+  return applyRelicEquipEffects(run, relicId);
+}
+
 // ---------------------------------------------------------------------------
 // Reward application helpers
 // ---------------------------------------------------------------------------
@@ -116,7 +127,8 @@ function applyReward(state: RunState, reward: Reward): RunState {
     }
     case 'relic': {
       if (state.relics.includes(reward.relicId)) return state;
-      return { ...state, relics: [...state.relics, reward.relicId] };
+      const equipped = { ...state, relics: [...state.relics, reward.relicId] };
+      return withRelicEquip(equipped, reward.relicId);
     }
     case 'gold': {
       return {
@@ -176,7 +188,8 @@ function applyEventEffect(state: RunState, effect: CardEffect, idx: number): Run
     case 'gainRelic': {
       if (effect.relicId) {
         if (state.relics.includes(effect.relicId)) return state;
-        return { ...state, relics: [...state.relics, effect.relicId] };
+        const equipped = { ...state, relics: [...state.relics, effect.relicId] };
+        return withRelicEquip(equipped, effect.relicId);
       }
       const pool = effect.tier === 'rare'
         ? EVENT_RELIC_POOL_RARE
@@ -186,7 +199,8 @@ function applyEventEffect(state: RunState, effect: CardEffect, idx: number): Run
       const candidates = pool.filter((r) => !state.relics.includes(r));
       if (candidates.length === 0) return state;
       const picked = eventRng(state, idx + 101).pick(candidates);
-      return { ...state, relics: [...state.relics, picked] };
+      const equipped = { ...state, relics: [...state.relics, picked] };
+      return withRelicEquip(equipped, picked);
     }
     case 'removeRandomCard': {
       // Avoid removing starter cards (heuristic: keep at least 5 cards in deck)
@@ -235,7 +249,7 @@ function nextStage(current: EvolutionStage): EvolutionStage {
 export function runReducer(state: RunState, action: RunAction): RunState {
   switch (action.type) {
     case 'START_RUN': {
-      return buildInitialRun(
+      const initial = buildInitialRun(
         action.heroId,
         action.seed,
         action.ascensionLevel ?? 0,
@@ -243,6 +257,9 @@ export function runReducer(state: RunState, action: RunAction): RunState {
         action.starterRelic,
         action.baseHp,
       );
+      // Apply equip-time effects of the starter relic (e.g. cuore_di_pietra
+      // → +8 maxHp, uovo_del_primo → start at adulto stage).
+      return withRelicEquip(initial, action.starterRelic);
     }
 
     case 'SELECT_NODE': {
@@ -315,9 +332,19 @@ export function runReducer(state: RunState, action: RunAction): RunState {
       const hpAfterCombat = Math.max(1, action.heroHpAfter);
       const hpHealed = Math.min(state.maxHp, hpAfterCombat + 5);
 
-      // Boss defeat → run victory
+      // Boss defeat → ancestral relic choice, then victory
       const currentNode = state.map.nodes.find((n) => n.id === state.map.currentNodeId);
       if (currentNode?.type === 'boss') {
+        const ANCESTRAL: RelicId[] = ['uovo_del_primo' as RelicId, 'lacrima_triassica' as RelicId];
+        const options = ANCESTRAL.filter((r) => !state.relics.includes(r));
+        if (options.length >= 1) {
+          return {
+            ...state,
+            hp: hpHealed,
+            stats: mergedStats,
+            phase: { t: 'bossReward', options: options.slice(0, 2) },
+          };
+        }
         return {
           ...state,
           hp: hpHealed,
@@ -336,6 +363,14 @@ export function runReducer(state: RunState, action: RunAction): RunState {
 
     case 'COMBAT_DEFEAT': {
       return { ...state, hp: 0, phase: { t: 'gameOver', reason: 'death' } };
+    }
+
+    case 'PICK_BOSS_REWARD': {
+      if (state.phase.t !== 'bossReward') return state;
+      const stateAfter = action.relicId
+        ? applyReward(state, { kind: 'relic', relicId: action.relicId })
+        : state;
+      return { ...stateAfter, phase: { t: 'gameOver', reason: 'victory' } };
     }
 
     case 'PICK_REWARD': {

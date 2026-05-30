@@ -117,6 +117,7 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
             energyMax: heroStats.energyMax,
             handSize: heroStats.handSize,
             statuses: {},
+            relics: run.relics,
             relicCounters: run.relicCounters,
           },
           enemies,
@@ -181,6 +182,7 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
         deckCardIds,
         relicPool: [],
         ascensionLevel: run.ascensionLevel,
+        ownedRelics: run.relics,
       },
       rng,
     );

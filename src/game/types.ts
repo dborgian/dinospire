@@ -206,6 +206,7 @@ export type RunPhase =
   | { t: 'shop' }
   | { t: 'rest' }
   | { t: 'growth' }
+  | { t: 'bossReward'; options: RelicId[] }
   | { t: 'gameOver'; reason: 'death' | 'victory' };
 
 export type Reward =
@@ -282,6 +283,8 @@ export type CombatState = {
     energyMax: number;
     handSize: number;
     statuses: StatusMap;
+    /** Relics carried into combat — used by the trigger dispatcher. */
+    relics: RelicId[];
     relicCounters: Record<RelicId, number>;
   };
   enemies: EnemyInstance[];
