@@ -66,8 +66,11 @@ const TYPE_BANNER: Record<string, string> = {
   power:  'amber-gold "POTERE" type banner beneath the art, star icon on left',
 };
 
-const BOREA_DESCRIPTION =
-  'Borealopelta ankylosaur — quadrupedal living fortress, covered in heavy stone-like osteoderms and bony armor plates, earth-brown and stone-grey coloring, massive tail club';
+const HERO_DESCRIPTIONS: Record<string, string> = {
+  borea: 'Borealopelta ankylosaur — quadrupedal living fortress, covered in heavy stone-like osteoderms and bony armor plates, earth-brown and stone-grey coloring, massive tail club',
+  rex:   'juvenile Tyrannosaurus rex — bipedal apex predator, massive skull with rows of serrated teeth, powerful hindlegs, tiny forelimbs, dark charcoal scales with volcanic red and orange accents, raw predatory power',
+  veloce: 'young Deinonychus — agile feathered dromeosaurid, razor-sharp retractable sickle claws on each foot, sleek build, blue-grey plumage with iridescent teal feather tips, lightning-fast pack hunter',
+};
 
 // ---------------------------------------------------------------------------
 // Effect text builder (plain Italian, concise)
@@ -90,14 +93,14 @@ function effectText(effects: CardEffect[]): string {
 // Full-card prompt builder
 // ---------------------------------------------------------------------------
 
-function buildFullCardPrompt(card: CardData): string {
+function buildFullCardPrompt(card: CardData, hero: string): string {
   const frame    = RARITY_FRAME[card.rarity] ?? RARITY_FRAME.common;
   const typeBnr  = TYPE_BANNER[card.type] ?? TYPE_BANNER.skill;
   const cost     = card.cost === 'X' ? 'X' : String(card.cost);
   const effDesc  = effectText(card.effects);
   const flavor   = card.flavorIt ? `"${card.flavorIt.slice(0, 60)}"` : '';
+  const heroDesc = HERO_DESCRIPTIONS[hero] ?? HERO_DESCRIPTIONS.borea;
 
-  // Scene / mood from card type + effects
   const primaryEff = card.effects[0]?.kind ?? 'skill';
   const sceneMap: Record<string, string> = {
     damage:      'powerful impact strike, shockwave, ground crack, debris flying',
@@ -116,7 +119,7 @@ function buildFullCardPrompt(card: CardData): string {
     `Top-left corner: circular amber energy gem badge with the number "${cost}" in bold white — this is the mana/energy cost.`,
     `Top-right corner: small rectangular rarity label "${card.rarity.toUpperCase()}" in matching frame color.`,
     `Card name plate at top center: decorative banner with the bold text "${card.name.it}" in fantasy serif font.`,
-    `Central illustration (fills ~55% of card height): ${BOREA_DESCRIPTION}. Scene: ${scene}. Dramatic chiaroscuro lighting, painterly digital art, Hearthstone quality.`,
+    `Central illustration (fills ~55% of card height): ${heroDesc}. Scene: ${scene}. Dramatic chiaroscuro lighting, painterly digital art, Hearthstone quality.`,
     `Below illustration: ${typeBnr}.`,
     `Effect text box: dark parchment texture background, legible fantasy font, text reads: "${effDesc}."`,
     flavor ? `Flavor text in italics at bottom: ${flavor}.` : '',
@@ -192,7 +195,7 @@ async function main() {
       continue;
     }
 
-    const prompt = buildFullCardPrompt(card);
+    const prompt = buildFullCardPrompt(card, HERO);
 
     if (DRY_RUN) {
       console.log(`  [DRY] ${card.id}:\n    ${prompt.slice(0, 120)}…\n`);
