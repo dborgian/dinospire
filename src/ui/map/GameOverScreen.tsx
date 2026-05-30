@@ -2,11 +2,21 @@
 // GameOverScreen — end-of-run summary with stats, score, and meta unlocks.
 // ---------------------------------------------------------------------------
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRunStore } from '../../stores/runStore';
 import { useMetaStore } from '../../stores/metaStore';
+import { useAuthStore } from '../../stores/authStore';
+import { submitScore } from '../../lib/leaderboard';
+import { firebaseConfigured } from '../../lib/firebase';
+import LeaderboardScreen from '../meta/LeaderboardScreen';
 import type { RunState } from '../../game/types';
+
+function formatDuration(ms: number): string {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  return `${m}:${String(s % 60).padStart(2, '0')}`;
+}
 
 // ---------------------------------------------------------------------------
 // Score calculation
@@ -90,17 +100,23 @@ interface GameOverScreenProps {
 }
 
 export default function GameOverScreen({ reason }: GameOverScreenProps) {
-  const run            = useRunStore((s) => s.run);
-  const clearRun       = useRunStore((s) => s.clearRun);
-  const recordRunEnd   = useMetaStore((s) => s.recordRunEnd);
+  const run              = useRunStore((s) => s.run);
+  const clearRun         = useRunStore((s) => s.clearRun);
+  const recordRunEnd     = useMetaStore((s) => s.recordRunEnd);
   const advanceAscension = useMetaStore((s) => s.advanceAscension);
-  const metaProfile    = useMetaStore((s) => s.profile);
-  const recorded       = useRef(false);
+  const metaProfile      = useMetaStore((s) => s.profile);
+  const { user, signIn } = useAuthStore();
+  const recorded         = useRef(false);
+  const scoreSubmitted   = useRef(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const isVictory = reason === 'victory';
 
-  // Capture run snapshot before clearRun is called
+  // Capture run snapshot and duration before clearRun is called
   const runSnapshot = useRef<RunState | null>(run ?? null);
+  const durationMs  = useRef(
+    run?.startedAt ? Date.now() - run.startedAt : 0,
+  );
 
   useEffect(() => {
     if (recorded.current) return;
@@ -108,6 +124,32 @@ export default function GameOverScreen({ reason }: GameOverScreenProps) {
     recordRunEnd(isVictory);
     if (isVictory) advanceAscension();
   }, [isVictory, recordRunEnd, advanceAscension]);
+
+  // Submit score whenever user is available (auto on mount if signed in,
+  // or after sign-in popup resolves)
+  useEffect(() => {
+    if (!user || !runSnapshot.current || scoreSubmitted.current) return;
+    scoreSubmitted.current = true;
+    const snap = runSnapshot.current;
+    const maxFloorLocal = Math.max(
+      0,
+      ...snap.map.nodes.filter((n) => n.visited).map((n) => n.floor),
+    );
+    submitScore({
+      uid:            user.uid,
+      displayName:    user.displayName ?? 'Anonimo',
+      photoURL:       user.photoURL ?? '',
+      heroId:         snap.heroId,
+      score:          calcScore(snap),
+      durationMs:     durationMs.current,
+      floor:          maxFloorLocal + 1,
+      combatsWon:     snap.stats.combatsWon,
+      elitesDefeated: snap.stats.elitesDefeated,
+      evolutionStage: snap.evolutionStage,
+      ascensionLevel: snap.ascensionLevel,
+      victory:        isVictory,
+    }).catch(console.error);
+  }, [user, isVictory]);
 
   const snap = runSnapshot.current;
   const score = snap ? calcScore(snap) : 0;
@@ -117,6 +159,10 @@ export default function GameOverScreen({ reason }: GameOverScreenProps) {
     : 0;
 
   const newAscension = isVictory ? metaProfile.ascensionLevel : null;
+
+  if (showLeaderboard) {
+    return <LeaderboardScreen onBack={() => setShowLeaderboard(false)} />;
+  }
 
   return (
     <main
@@ -238,6 +284,15 @@ export default function GameOverScreen({ reason }: GameOverScreenProps) {
             <span className="text-sm" aria-hidden="true">❤</span>
             <span className="text-xs font-bold text-red-400">{snap.hp}/{snap.maxHp} HP</span>
           </div>
+          {/* Timer */}
+          {durationMs.current > 0 && (
+            <div className="flex items-center gap-1.5 bg-stone-900/80 border border-stone-700 rounded-full px-3 py-1">
+              <span className="text-sm" aria-hidden="true">⏱</span>
+              <span className="text-xs font-bold text-stone-300 tabular-nums">
+                {formatDuration(durationMs.current)}
+              </span>
+            </div>
+          )}
         </motion.div>
       )}
 
@@ -256,25 +311,64 @@ export default function GameOverScreen({ reason }: GameOverScreenProps) {
         </motion.div>
       )}
 
-      {/* New run button */}
-      <motion.button
-        type="button"
-        onClick={clearRun}
-        className={[
-          'z-10 h-12 px-10 rounded-xl font-black uppercase tracking-wider text-sm transition-all',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400',
-          'active:scale-95 cursor-pointer',
-          isVictory
-            ? 'bg-amber-600 hover:bg-amber-500 text-stone-950 shadow-lg shadow-amber-600/30'
-            : 'bg-stone-800 hover:bg-stone-700 text-stone-100',
-        ].join(' ')}
+      {/* Firebase auth + score submission feedback */}
+      {firebaseConfigured && (
+        <motion.div
+          className="z-10 flex flex-col items-center gap-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.75 }}
+        >
+          {user ? (
+            <p className="text-xs text-stone-500">
+              {scoreSubmitted.current
+                ? `Punteggio salvato come ${user.displayName ?? user.email}`
+                : 'Salvataggio punteggio...'}
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void signIn()}
+              className="flex items-center gap-2 bg-stone-800 hover:bg-stone-700 text-stone-200 text-sm px-4 py-2 rounded-lg transition-colors"
+            >
+              <span aria-hidden="true">🔑</span>
+              Accedi con Google per salvare il punteggio
+            </button>
+          )}
+        </motion.div>
+      )}
+
+      {/* Action buttons */}
+      <motion.div
+        className="z-10 flex items-center gap-3"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        aria-label="Inizia una nuova run"
+        transition={{ delay: 0.85 }}
       >
-        Nuova Run
-      </motion.button>
+        <button
+          type="button"
+          onClick={() => setShowLeaderboard(true)}
+          className="h-12 px-6 rounded-xl font-bold uppercase tracking-wider text-sm transition-all bg-stone-800 hover:bg-stone-700 text-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 active:scale-95 cursor-pointer"
+          aria-label="Vedi classifica"
+        >
+          Classifica
+        </button>
+        <button
+          type="button"
+          onClick={clearRun}
+          className={[
+            'h-12 px-10 rounded-xl font-black uppercase tracking-wider text-sm transition-all',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400',
+            'active:scale-95 cursor-pointer',
+            isVictory
+              ? 'bg-amber-600 hover:bg-amber-500 text-stone-950 shadow-lg shadow-amber-600/30'
+              : 'bg-stone-800 hover:bg-stone-700 text-stone-100',
+          ].join(' ')}
+          aria-label="Inizia una nuova run"
+        >
+          Nuova Run
+        </button>
+      </motion.div>
     </main>
   );
 }

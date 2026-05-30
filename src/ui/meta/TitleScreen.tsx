@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useMetaStore } from '../../stores/metaStore';
 import { useRunStore } from '../../stores/runStore';
+import { useAuthStore } from '../../stores/authStore';
 import { loadHeroes } from '../../game/content/index';
+import { firebaseConfigured } from '../../lib/firebase';
+import LeaderboardScreen from './LeaderboardScreen';
 import type { HeroDefinition, HeroId, CardInstanceId, CardInstance } from '../../game/types';
 import type { RunAction } from '../../game/run/machine';
 
@@ -107,12 +110,14 @@ function HeroCard({ hero, selected, onSelect }: HeroCardProps) {
 // ---- Main TitleScreen ----
 
 export default function TitleScreen() {
-  const profile = useMetaStore((s) => s.profile);
+  const profile  = useMetaStore((s) => s.profile);
   const dispatch = useRunStore((s) => s.dispatch);
   const clearRun = useRunStore((s) => s.clearRun);
+  const { user, signIn, signOut } = useAuthStore();
 
-  const [heroes, setHeroes] = useState<HeroDefinition[]>([]);
+  const [heroes, setHeroes]             = useState<HeroDefinition[]>([]);
   const [selectedHeroId, setSelectedHeroId] = useState<HeroId | null>(null);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -159,6 +164,10 @@ export default function TitleScreen() {
     clearRun();
     dispatch(action);
     // App.tsx reacts to run state change and navigates automatically
+  }
+
+  if (showLeaderboard) {
+    return <LeaderboardScreen onBack={() => setShowLeaderboard(false)} />;
   }
 
   return (
@@ -226,6 +235,46 @@ export default function TitleScreen() {
         >
           Inizia Avventura
         </motion.button>
+
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setShowLeaderboard(true)}
+            className="text-stone-500 hover:text-stone-300 text-sm transition-colors underline-offset-2 hover:underline"
+          >
+            Classifica
+          </button>
+
+          {firebaseConfigured && (
+            user ? (
+              <div className="flex items-center gap-2">
+                {user.photoURL && (
+                  <img
+                    src={user.photoURL}
+                    alt=""
+                    className="w-5 h-5 rounded-full"
+                    referrerPolicy="no-referrer"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => void signOut()}
+                  className="text-stone-600 hover:text-stone-400 text-xs transition-colors"
+                >
+                  Esci ({user.displayName ?? user.email})
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void signIn()}
+                className="text-stone-500 hover:text-stone-300 text-xs transition-colors"
+              >
+                Accedi con Google
+              </button>
+            )
+          )}
+        </div>
       </div>
 
       {/* Run stats footer */}
