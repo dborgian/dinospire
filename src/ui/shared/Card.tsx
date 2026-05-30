@@ -157,7 +157,7 @@ function FullCard({
         exhaustStyle,
         "transition-all duration-150",
       ].filter(Boolean).join(" ")}
-      style={{ width: "clamp(110px, 8.5vw, 160px)", aspectRatio: "2/3" }}
+      style={{ width: "clamp(100px, 7.5vw, 140px)", aspectRatio: "2/3" }}
       onClick={onClick}
       role="button"
       tabIndex={isExhausted ? -1 : 0}
@@ -263,7 +263,7 @@ function HtmlCard({
         exhaustStyle,
         "transition-all duration-150",
       ].filter(Boolean).join(" ")}
-      style={{ width: "clamp(110px, 8.5vw, 160px)", aspectRatio: "2/3" }}
+      style={{ width: "clamp(100px, 7.5vw, 140px)", aspectRatio: "2/3" }}
       onClick={onClick}
       role="button"
       tabIndex={isExhausted ? -1 : 0}
