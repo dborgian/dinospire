@@ -246,6 +246,18 @@ export function runReducer(state: RunState, action: RunAction): RunState {
       // Sync hero HP from combat result, then heal 5 HP post-fight
       const hpAfterCombat = Math.max(1, action.heroHpAfter);
       const hpHealed = Math.min(state.maxHp, hpAfterCombat + 5);
+
+      // Boss defeat → run victory
+      const currentNode = state.map.nodes.find((n) => n.id === state.map.currentNodeId);
+      if (currentNode?.type === 'boss') {
+        return {
+          ...state,
+          hp: hpHealed,
+          stats: mergedStats,
+          phase: { t: 'gameOver', reason: 'victory' },
+        };
+      }
+
       return {
         ...state,
         hp: hpHealed,

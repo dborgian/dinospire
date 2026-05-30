@@ -140,19 +140,14 @@ function EnemyArt({ definitionId, name }: { definitionId: string; name: string }
       <img
         src={`/art/enemies/${definitionId}.png`}
         alt={name}
-        // 3:4 aspect ratio — 112px wide × 150px tall
-        className="w-28 rounded-lg object-cover"
-        style={{ aspectRatio: "3 / 4" }}
+        className="rounded-xl object-cover w-full h-full"
         onError={() => setErr(true)}
       />
     );
   }
   return (
-    <div
-      className="w-28 rounded-lg bg-stone-700 flex items-center justify-center"
-      style={{ aspectRatio: "3 / 4" }}
-    >
-      <span className="text-5xl select-none" aria-hidden="true">🦖</span>
+    <div className="w-full h-full rounded-xl bg-stone-800 flex items-center justify-center">
+      <span className="text-7xl select-none" aria-hidden="true">🦖</span>
     </div>
   );
 }
@@ -172,91 +167,96 @@ interface EnemyCardProps {
 function EnemyCard({ enemy, onClick, isPulsing, isShaking, isEnemyTurn }: EnemyCardProps) {
   const prefersReduced = useReducedMotion();
 
-  const shakeAnim = isShaking && !prefersReduced
-    ? { x: [-4, 4, -4, 4, 0] }
-    : {};
-
+  const shakeAnim = isShaking && !prefersReduced ? { x: [-6, 6, -6, 6, 0] } : {};
   const statuses = Object.entries(enemy.statuses) as [StatusKey, number][];
 
-  // Intent badge colours per type
   const intentBg: Record<IntentType, string> = {
-    attack:  "bg-red-900/90 border-red-700",
-    defend:  "bg-blue-900/90 border-blue-700",
-    buff:    "bg-amber-900/90 border-amber-700",
-    debuff:  "bg-purple-900/90 border-purple-700",
-    unknown: "bg-stone-800/90 border-stone-600",
+    attack:  "bg-red-900/95 border-red-500 text-red-200",
+    defend:  "bg-blue-900/95 border-blue-500 text-blue-200",
+    buff:    "bg-amber-900/95 border-amber-500 text-amber-200",
+    debuff:  "bg-purple-900/95 border-purple-500 text-purple-200",
+    unknown: "bg-stone-800/95 border-stone-500 text-stone-300",
   };
+
+  const hpPct = Math.max(0, (enemy.hp / enemy.maxHp) * 100);
 
   return (
     <motion.div
       animate={shakeAnim}
       transition={{ duration: 0.24, ease: "easeInOut" }}
-      className="relative flex flex-col items-center"
+      className="relative flex flex-col items-center gap-2"
     >
-      {/* ── Intent badge — floats above the art ── */}
-      <div
+      {/* ── Intent banner — large and readable ── */}
+      <motion.div
+        variants={intentPulseVariants}
+        animate={isEnemyTurn && !prefersReduced ? "pulse" : "idle"}
         className={[
-          "flex items-center gap-1.5 px-2.5 py-1 rounded-full border mb-1.5",
-          "text-xs font-bold select-none",
+          "flex items-center gap-2 px-4 py-1.5 rounded-full border-2 select-none",
+          "text-sm font-black tracking-wide shadow-lg",
           intentBg[enemy.nextIntent.type],
         ].join(" ")}
         aria-label={`Intenzione: ${enemy.nextIntent.description}`}
       >
-        {/* Pulse the icon when it's the enemy's turn */}
-        <motion.span
-          variants={intentPulseVariants}
-          animate={isEnemyTurn && !prefersReduced ? "pulse" : "idle"}
-          className="flex items-center"
-        >
-          <IntentIcon type={enemy.nextIntent.type} size="lg" />
-        </motion.span>
-        {enemy.nextIntent.value !== undefined && (
-          <span className={enemy.nextIntent.type === "attack" ? "text-red-200" : "text-blue-200"}>
-            {enemy.nextIntent.value}
-          </span>
-        )}
-        {enemy.nextIntent.type === "unknown" && (
-          <span className="text-stone-300">???</span>
-        )}
-      </div>
+        <IntentIcon type={enemy.nextIntent.type} size="lg" />
+        <span>
+          {enemy.nextIntent.type === "attack" && enemy.nextIntent.value !== undefined
+            ? `Attacca ${enemy.nextIntent.value}`
+            : enemy.nextIntent.type === "defend" && enemy.nextIntent.value !== undefined
+            ? `Difende +${enemy.nextIntent.value}`
+            : enemy.nextIntent.type === "buff" ? "Si potenzia"
+            : enemy.nextIntent.type === "debuff" ? "Ti indebolisce"
+            : "???"}
+        </span>
+      </motion.div>
 
+      {/* ── Main enemy card ── */}
       <button
         type="button"
         onClick={onClick}
-        className={[
-          "relative flex flex-col items-center gap-2 px-3 py-3 rounded-xl",
-          "bg-stone-900/80 backdrop-blur transition-all duration-150",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400",
-          isPulsing
-            ? "border-[3px] border-amber-400 shadow-[0_0_32px_rgba(251,191,36,0.7)]"
-            : "border-2 border-stone-700 hover:border-stone-500 shadow-lg shadow-black/40",
-          enemy.hp <= 0 ? "opacity-30 pointer-events-none" : "",
-        ].join(" ")}
-        aria-label={`Nemico: HP ${enemy.hp}/${enemy.maxHp}. Clicca per selezionare come bersaglio.`}
         disabled={enemy.hp <= 0}
+        aria-label={`${enemy.definitionId}: ${enemy.hp}/${enemy.maxHp} HP. Clicca per bersagliare.`}
+        className={[
+          "relative rounded-2xl overflow-hidden transition-all duration-150",
+          "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-400",
+          isPulsing
+            ? "ring-4 ring-amber-400 shadow-[0_0_40px_rgba(251,191,36,0.8)]"
+            : "shadow-2xl shadow-black/60",
+          enemy.hp <= 0 ? "opacity-20 pointer-events-none" : "cursor-pointer",
+        ].join(" ")}
+        style={{ width: "clamp(140px, 18vw, 220px)", aspectRatio: "3/4" }}
       >
-        {/* Enemy art — large and visually dominant */}
+        {/* Art fills entire card */}
         <EnemyArt definitionId={enemy.definitionId} name={enemy.definitionId} />
 
-        {/* HP bar */}
-        <div className="w-full">
-          <div className="flex justify-between text-[10px] text-stone-400 mb-0.5">
+        {/* Gradient overlay at bottom for text legibility */}
+        <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/90 to-transparent" />
+
+        {/* Name */}
+        <div className="absolute bottom-10 inset-x-0 px-2 text-center">
+          <p className="text-white font-black text-sm uppercase tracking-wide truncate drop-shadow-lg">
+            {enemy.definitionId.replace(/_/g, " ")}
+          </p>
+        </div>
+
+        {/* HP bar over image */}
+        <div className="absolute bottom-2 inset-x-2" role="progressbar"
+             aria-valuenow={enemy.hp} aria-valuemin={0} aria-valuemax={enemy.maxHp}>
+          <div className="flex justify-between text-[10px] text-stone-300 mb-0.5 px-0.5">
             <span>❤ {enemy.hp}</span>
-            <span>{enemy.maxHp}</span>
+            <span className="text-stone-400">{enemy.maxHp}</span>
           </div>
-          <div className="w-full h-2 bg-stone-700 rounded-full overflow-hidden" role="progressbar"
-               aria-valuenow={enemy.hp} aria-valuemin={0} aria-valuemax={enemy.maxHp}>
+          <div className="w-full h-2.5 bg-black/60 rounded-full overflow-hidden border border-black/40">
             <div
-              className={`h-full rounded-full transition-all duration-300 ${hpBarColor(enemy.hp, enemy.maxHp)}`}
-              style={{ width: `${Math.max(0, (enemy.hp / enemy.maxHp) * 100)}%` }}
+              className={`h-full rounded-full transition-all duration-400 ${hpBarColor(enemy.hp, enemy.maxHp)}`}
+              style={{ width: `${hpPct}%` }}
             />
           </div>
         </div>
 
-        {/* Block bubble */}
+        {/* Block overlay bubble */}
         {enemy.block > 0 && (
-          <div className="flex items-center gap-1 text-blue-300 text-xs font-bold" aria-label={`Blocco: ${enemy.block}`}>
-            <Shield className="w-3.5 h-3.5" aria-hidden="true" />
+          <div className="absolute top-2 right-2 flex items-center gap-1 bg-blue-900/90 border border-blue-400 text-blue-200 text-xs font-black px-1.5 py-0.5 rounded-full shadow">
+            <Shield className="w-3 h-3" aria-hidden="true" />
             {enemy.block}
           </div>
         )}
