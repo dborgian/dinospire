@@ -1,6 +1,8 @@
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { loadCards } from '../../game/content/index';
 import { useRunStore } from '../../stores/runStore';
-import type { MapNode, NodeId, NodeType, EvolutionStage } from '../../game/types';
+import type { Card, MapNode, NodeId, NodeType, EvolutionStage } from '../../game/types';
 
 // ---- Constants ----
 const SVG_WIDTH = 320;
@@ -148,11 +150,112 @@ function ConnectionLine({ x1, y1, x2, y2, available }: ConnectionLineProps) {
   );
 }
 
+// ---- Deck overlay ----
+interface DeckOverlayProps {
+  deck: { cardId: string; upgraded: boolean }[];
+  cardDefs: Map<string, Card>;
+  onClose: () => void;
+}
+
+function DeckOverlay({ deck, cardDefs, onClose }: DeckOverlayProps) {
+  // Group by cardId + upgraded to show counts
+  const counts = new Map<string, { def: Card | undefined; upgraded: boolean; count: number }>();
+  for (const ci of deck) {
+    const key = `${ci.cardId}|${ci.upgraded}`;
+    const existing = counts.get(key);
+    if (existing) {
+      existing.count++;
+    } else {
+      counts.set(key, { def: cardDefs.get(ci.cardId), upgraded: ci.upgraded, count: 1 });
+    }
+  }
+  const entries = [...counts.values()].sort((a, b) => {
+    const nameA = a.def?.name.it ?? a.def?.name.it ?? '';
+    const nameB = b.def?.name.it ?? b.def?.name.it ?? '';
+    return nameA.localeCompare(nameB, 'it');
+  });
+
+  const RARITY_COLOR: Record<string, string> = {
+    starter:  'text-stone-400',
+    common:   'text-stone-300',
+    uncommon: 'text-blue-300',
+    rare:     'text-amber-300',
+  };
+  const TYPE_ICON: Record<string, string> = { attack: '⚔', skill: '🛡', power: '⚡' };
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-40 bg-black/60"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <motion.div
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+        className="fixed inset-x-0 bottom-0 z-50 bg-stone-900 border-t-2 border-stone-700 rounded-t-2xl p-4 max-h-[70vh] flex flex-col"
+        role="dialog"
+        aria-label="Mazzo corrente"
+      >
+        <div className="flex items-center justify-between mb-3 shrink-0">
+          <h2 className="text-sm font-bold text-stone-100">Mazzo ({deck.length} carte)</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-stone-400 hover:text-stone-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded px-2 py-1"
+            aria-label="Chiudi mazzo"
+          >
+            ✕
+          </button>
+        </div>
+        <ul className="flex flex-col gap-1 overflow-y-auto">
+          {entries.map(({ def, upgraded, count }, i) => (
+            <li
+              key={i}
+              className="flex items-center gap-2 text-xs py-1 border-b border-stone-800"
+            >
+              <span className="text-stone-500 w-4 text-center">
+                {TYPE_ICON[def?.type ?? 'skill'] ?? '?'}
+              </span>
+              <span className={`font-semibold flex-1 ${RARITY_COLOR[def?.rarity ?? 'common']}`}>
+                {def?.name.it ?? def?.name.it ?? '???'}
+                {upgraded && <span className="text-amber-400 ml-1">+</span>}
+              </span>
+              <span className="text-stone-500">
+                {def?.cost ?? '?'}⚡
+              </span>
+              {count > 1 && (
+                <span className="text-stone-400 bg-stone-800 rounded-full px-1.5 py-0.5 text-xs">
+                  ×{count}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </motion.div>
+    </>
+  );
+}
+
 // ---- Main MapScreen ----
 export default function MapScreen() {
   const run = useRunStore((s) => s.run);
   const dispatch = useRunStore((s) => s.dispatch);
   const clearRun = useRunStore((s) => s.clearRun);
+  const [showDeck, setShowDeck] = useState(false);
+  const [cardDefs, setCardDefs] = useState<Map<string, Card>>(new Map());
+
+  useEffect(() => {
+    if (!run) return;
+    loadCards(run.act).then((cards) => {
+      setCardDefs(new Map(cards.map((c) => [c.id, c])));
+    }).catch(() => {});
+  }, [run?.act]);
 
   if (!run) return null;
 
@@ -208,6 +311,13 @@ export default function MapScreen() {
             >
               {STAGE_LABELS[evolutionStage]}
             </span>
+            <button
+              onClick={() => setShowDeck(true)}
+              className="text-xs text-stone-400 hover:text-amber-300 transition-colors px-2 py-0.5 rounded bg-stone-800 hover:bg-stone-700"
+              aria-label="Visualizza mazzo"
+            >
+              🃏 Mazzo
+            </button>
             <button
               onClick={() => {
                 if (confirm('Abbandonare la run in corso?')) clearRun();
@@ -270,6 +380,16 @@ export default function MapScreen() {
           })}
         </svg>
       </div>
+
+      <AnimatePresence>
+        {showDeck && (
+          <DeckOverlay
+            deck={run.deck}
+            cardDefs={cardDefs}
+            onClose={() => setShowDeck(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
