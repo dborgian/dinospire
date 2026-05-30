@@ -459,6 +459,23 @@ function resolveEffect(
         return resolveForTarget(s, targetId);
       } else if (effect.target === 'enemy' && !actorIsHero) {
         // Enemy attacking the hero ("enemy" from the enemy's POV = the player)
+        // Dodge: consumes 1 stack and fully negates the incoming attack.
+        const dodgeStacks = s.hero.statuses['dodge'] ?? 0;
+        if (dodgeStacks > 0) {
+          const next = {
+            ...s,
+            hero: {
+              ...s.hero,
+              statuses: { ...s.hero.statuses, dodge: dodgeStacks - 1 },
+            },
+          };
+          return logEvent(next, 'dodge', {
+            actorIsHero: false,
+            avoided: damage,
+            stacksLeft: dodgeStacks - 1,
+          });
+        }
+
         const { hp, block } = applyDamageToDefender(
           s.hero.hp,
           s.hero.block,
@@ -783,14 +800,15 @@ export function tickStatusDamageOnHero(
 
   s = logEvent(s, 'status_tick', { status, stacks, target: 'hero', hpAfter: s.hero.hp });
 
-  // Poison decrements by 1 after dealing damage (min 0)
-  if (status === 'poison') {
-    const newPoison = Math.max(0, stacks - 1);
+  // Poison and burn both decrement by 1 after dealing damage (min 0).
+  // Bleed does NOT auto-decay — it persists until end of combat or cleansed.
+  if (status === 'poison' || status === 'burn') {
+    const newStacks = Math.max(0, stacks - 1);
     s = {
       ...s,
       hero: {
         ...s.hero,
-        statuses: { ...s.hero.statuses, poison: newPoison },
+        statuses: { ...s.hero.statuses, [status]: newStacks },
       },
     };
   }
@@ -821,11 +839,11 @@ export function tickStatusDamageOnEnemy(
     hpAfter: findEnemy(s, enemyIid)?.hp ?? 0,
   });
 
-  // Poison decrements by 1 after dealing damage (min 0)
-  if (status === 'poison') {
+  // Poison and burn both decrement by 1 after dealing damage (min 0).
+  if (status === 'poison' || status === 'burn') {
     s = updateEnemy(s, enemyIid, (e) => ({
       ...e,
-      statuses: { ...e.statuses, poison: Math.max(0, stacks - 1) },
+      statuses: { ...e.statuses, [status]: Math.max(0, stacks - 1) },
     }));
   }
 

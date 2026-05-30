@@ -1,16 +1,5 @@
 [
   {
-    "id": "compagno",
-    "name": { "it": "Compagno" },
-    "cost": 0,
-    "type": "attack",
-    "rarity": "common",
-    "act": 1,
-    "tags": ["branco", "compagno"],
-    "effects": [{ "kind": "damage", "amount": 3, "target": "enemy" }],
-    "upgraded": { "effects": [{ "kind": "damage", "amount": 5, "target": "enemy" }] }
-  },
-  {
     "id": "compagno_neutro",
     "name": { "it": "Compagno" },
     "cost": 0,

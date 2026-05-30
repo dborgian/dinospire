@@ -1,11 +1,34 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import type { CardEffect, CardInstanceId, CombatAction, CombatState, EnemyDefinition, EnemyId } from "@/game/types";
+import type { CardEffect, CardInstanceId, CardTag, CombatAction, CombatState, EnemyDefinition, EnemyId } from "@/game/types";
 import { combatReducer, checkCombatOver } from "@/game/combat/reducer";
-import { applyEffects } from "@/game/combat/effects";
+import { applyEffects, tickStatusDamageOnHero } from "@/game/combat/effects";
 import { canPlayCard } from "@/game/combat/selectors";
 import { contentRegistry } from "@/game/content/index";
+
+/**
+ * Build a Map<CardInstanceId, CardTag[]> by joining every live card instance
+ * (draw + hand + discard + exhaust) with its definition's tag list. Required
+ * by `synergy` effects which count tagged cards in the active piles.
+ */
+function buildTagMap(combat: CombatState): ReadonlyMap<CardInstanceId, readonly CardTag[]> {
+  const map = new Map<CardInstanceId, readonly CardTag[]>();
+  const pool = [
+    ...combat.piles.draw,
+    ...combat.piles.hand,
+    ...combat.piles.discard,
+    ...combat.piles.exhaust,
+  ];
+  for (const iid of pool) {
+    const instance = combat.cardInstances[iid];
+    if (!instance) continue;
+    const def = contentRegistry.cards.get(instance.cardId);
+    if (!def) continue;
+    map.set(iid, def.tags);
+  }
+  return map;
+}
 
 interface CombatStore {
   combat: CombatState | null;
@@ -90,8 +113,17 @@ export const useCombatStore = create<CombatStore>()(
             activeEffects,
             true,
             targetId,
-            { sourceCardIid: cardIid },
+            {
+              sourceCardIid: cardIid,
+              tagMap: buildTagMap(s),
+            },
           );
+
+          // 2b. Bleed: hero takes 1 HP per stack each time a card is played
+          // (matches the in-combat tooltip; engine end-of-turn tick is for poison/burn).
+          if ((s.hero.statuses['bleed'] ?? 0) > 0) {
+            s = tickStatusDamageOnHero(s, 'bleed');
+          }
 
           // 3. Move to discard — skip if an exhaust effect already removed it from hand
           if (s.piles.hand.includes(cardIid)) {

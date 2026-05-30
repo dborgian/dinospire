@@ -287,10 +287,12 @@ function handleEndTurn(
 
   let s = state;
 
-  // ---- Phase 1: Tick hero periodic statuses (poison/bleed/burn deal damage) ----
+  // ---- Phase 1: Tick hero periodic statuses (poison/burn deal damage) ----
+  // Bleed is intentionally NOT ticked here — it triggers per card played
+  // inside combatStore.playCard (matches the in-combat tooltip).
   s = withPhase(s, 'enemy_intent');
 
-  for (const statusKey of ['poison', 'bleed', 'burn'] as const) {
+  for (const statusKey of ['poison', 'burn'] as const) {
     s = tickStatusDamageOnHero(s, statusKey);
   }
 
@@ -333,8 +335,10 @@ function handleEndTurn(
   }
 
   // ---- Phase 4: Tick enemy periodic statuses then decrement their debuffs ----
+  // Bleed on enemies is also per-action (handled in executeEnemyMoveInline / playCard),
+  // not in the end-of-turn tick.
   for (const enemy of s.enemies.filter((e) => e.hp > 0)) {
-    for (const statusKey of ['poison', 'bleed', 'burn'] as const) {
+    for (const statusKey of ['poison', 'burn'] as const) {
       s = tickStatusDamageOnEnemy(s, enemy.iid, statusKey);
     }
     s = {

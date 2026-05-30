@@ -362,6 +362,7 @@ const HERO_STATUS_META: Partial<Record<StatusKey, { icon: string; label: string;
   dexterity:  { icon: "🛡",  label: "Destrezza", negative: false },
   vigor:      { icon: "⚡",  label: "Vigore",    negative: false },
   thorns:     { icon: "🌵", label: "Spine",      negative: false },
+  dodge:      { icon: "👁",  label: "Schivata",   negative: false },
 };
 
 function HeroStatusChip({ status, stacks }: { status: StatusKey; stacks: number }) {
@@ -390,8 +391,8 @@ function HeroStatusChip({ status, stacks }: { status: StatusKey; stacks: number 
             {status === "vulnerable" && "Ricevi il 50% di danni in più dagli attacchi nemici."}
             {status === "frail"      && "Guadagni il 25% di blocco in meno dalle carte."}
             {status === "poison"     && `Perdi ${stacks} HP a fine turno, poi il veleno si riduce di 1.`}
-            {status === "burn"       && `Perdi ${stacks} HP a fine turno.`}
-            {status === "bleed"      && "Perdi 1 HP ogni volta che giochi una carta."}
+            {status === "burn"       && `Perdi ${stacks} HP a fine turno, poi si riduce di 1.`}
+            {status === "bleed"      && `Perdi ${stacks} HP ogni volta che giochi una carta.`}
           </div>
         )}
       </div>

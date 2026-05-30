@@ -826,7 +826,9 @@ describe('combatReducer', () => {
       expect(next.hero.statuses['strength']).toBe(2);
     });
 
-    it('bleed on enemy deals damage without decrement', () => {
+    it('bleed on enemy is NOT ticked at end of turn (per-action only)', () => {
+      // Bleed is now triggered per card played (combatStore.playCard) /
+      // per enemy action, NOT during the end-of-turn periodic tick.
       const enemy = makeEnemy('e1', { statuses: { bleed: 4 } });
       const def = makeEnemyDef('e1', { moves: [{ id: 'nothing', intent: { type: 'buff', description: '-' }, effects: [] }] });
       const defs = new Map<EnemyId, EnemyDefinition>([['e1' as EnemyId, def]]);
@@ -835,8 +837,9 @@ describe('combatReducer', () => {
       const next = combatReducer(state, { type: 'END_TURN' }, defs);
 
       const updatedEnemy = next.enemies.find((e) => e.iid === 'e1');
-      expect(updatedEnemy?.hp).toBe(36); // 40 - 4
-      // bleed does NOT decrement
+      // HP unchanged — end-of-turn tick no longer applies to bleed
+      expect(updatedEnemy?.hp).toBe(40);
+      // Bleed stacks persist (no auto-decay)
       expect(updatedEnemy?.statuses['bleed']).toBe(4);
     });
   });
