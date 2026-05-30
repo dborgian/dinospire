@@ -9,13 +9,12 @@
     "act": 1,
     "tags": ["erbivoro", "ankylosauro"],
     "effects": [
-      { "kind": "damage", "amount": 5, "target": "enemy" },
-      { "kind": "block", "amount": 4 }
+      { "kind": "damage", "amount": 8, "target": "enemy" }
     ],
     "upgraded": {
       "effects": [
-        { "kind": "damage", "amount": 7, "target": "enemy" },
-        { "kind": "block", "amount": 6 }
+        { "kind": "damage", "amount": 8, "target": "enemy" },
+        { "kind": "block", "amount": 5 }
       ]
     },
     "flavorIt": "Attacco e difesa in un solo gesto."
