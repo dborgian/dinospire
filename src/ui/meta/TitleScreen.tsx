@@ -105,14 +105,10 @@ function HeroCard({ hero, selected, onSelect }: HeroCardProps) {
 }
 
 // ---- Main TitleScreen ----
-interface TitleScreenProps {
-  onActivate?: () => void;
-}
 
-export default function TitleScreen({ onActivate }: TitleScreenProps) {
+export default function TitleScreen() {
   const profile = useMetaStore((s) => s.profile);
   const dispatch = useRunStore((s) => s.dispatch);
-  const existingRun = useRunStore((s) => s.run);
   const clearRun = useRunStore((s) => s.clearRun);
 
   const [heroes, setHeroes] = useState<HeroDefinition[]>([]);
@@ -162,11 +158,7 @@ export default function TitleScreen({ onActivate }: TitleScreenProps) {
 
     clearRun();
     dispatch(action);
-    onActivate?.();
-  }
-
-  function handleResume() {
-    onActivate?.();
+    // App.tsx reacts to run state change and navigates automatically
   }
 
   return (
@@ -217,19 +209,6 @@ export default function TitleScreen({ onActivate }: TitleScreenProps) {
 
       {/* CTA */}
       <div className="flex flex-col items-center gap-3">
-        {/* Resume run button — only shown when a run already exists in this browser */}
-        {existingRun && (
-          <motion.button
-            type="button"
-            onClick={handleResume}
-            className="h-12 px-8 rounded-lg font-bold tracking-widest text-base uppercase transition-colors bg-stone-700 hover:bg-stone-600 text-stone-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            ▶ Continua Partita
-          </motion.button>
-        )}
-
         <motion.button
           type="button"
           onClick={handleStart}
@@ -245,7 +224,7 @@ export default function TitleScreen({ onActivate }: TitleScreenProps) {
           whileHover={selectedHeroId ? { scale: 1.03 } : {}}
           whileTap={selectedHeroId ? { scale: 0.97 } : {}}
         >
-          {existingRun ? '↺ Nuova Partita' : 'Inizia Avventura'}
+          Inizia Avventura
         </motion.button>
       </div>
 

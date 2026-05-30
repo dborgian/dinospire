@@ -1,11 +1,13 @@
 // ---------------------------------------------------------------------------
 // Run store — Zustand slice for the active run state.
 // Wraps the pure runReducer via immer for structural sharing.
-// Persisted to localStorage via Zustand's persist middleware for crash recovery.
+// Persisted to sessionStorage (per-tab) so multiple browser tabs never share
+// the same run state. sessionStorage survives page refreshes but not tab close,
+// which is the correct crash-recovery granularity for a single-player game.
 // ---------------------------------------------------------------------------
 
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import type { RunAction } from '@/game/run/machine';
 import { runReducer } from '@/game/run/machine';
@@ -54,7 +56,10 @@ export const useRunStore = create<RunStore>()(
           });
         },
       })),
-      { name: 'dinospire-run' },
+      {
+        name: 'dinospire-run',
+        storage: createJSONStorage(() => sessionStorage),
+      },
     ),
     { name: 'RunStore' },
   ),
