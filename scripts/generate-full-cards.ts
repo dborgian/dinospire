@@ -198,7 +198,7 @@ function buildPrompt(card: CardData, hero: string): string {
 
     `EFFECT TEXT BOX (below type banner): dark parchment-brown background with subtle texture. Large readable fantasy font. Text: "${effText}"`,
 
-    flavor ? `FLAVOR TEXT (at the very bottom, italics, smaller than effect text): "${flavor}"` : '',
+    flavor ? `At the very bottom of the card, a small italicized quote in a thin separator box: "${flavor}"` : '',
 
     `STYLE RULES: painterly digital art, dark color palette (obsidian, volcanic amber, warm gold, stone grey). All text must be clearly legible — no blurry or garbled letters. No watermarks. No lorem ipsum. No placeholder text. The card layout is complete top-to-bottom.`,
   ].filter(Boolean).join('\n\n');
