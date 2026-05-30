@@ -380,14 +380,13 @@ export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", go
   // ---------------------------------------------------------------------------
 
   const backgroundPath = useMemo(() => {
-    // Prefer an explicit numeric seed on the combat object when available.
-    // @ts-expect-error — combat.seed is not yet in the type definition
-    const seed = (combat?.seed as number | undefined) ?? 0;
+    // Pick background based on turn count as a stable-ish seed
+    const seed = combat?.turn ?? 0;
     const idx = Math.abs(seed) % ARENA_BACKGROUNDS.length;
     return ARENA_BACKGROUNDS[idx] ?? ARENA_BACKGROUNDS[0];
-  // Re-pick only when a new combat session starts (combat identity changes).
+  // Re-pick only when combat first loads
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [combat?.id]);
+  }, [!!combat]);
 
   const [bgError, setBgError] = useState(false);
 

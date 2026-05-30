@@ -30,10 +30,12 @@
       }
     },
     "starterDeck": [
-      "morso_r", "morso_r", "morso_r", "morso_r", "morso_r",
+      "morso_r", "morso_r", "morso_r",
       "affondo_r",
-      "coda_spazzante_r", "coda_spazzante_r", "coda_spazzante_r",
-      "ruggito_r"
+      "coda_spazzante_r", "coda_spazzante_r",
+      "sentinella_apex_r", "sentinella_apex_r",
+      "ruggito_r",
+      "istinto_caccia_r"
     ],
     "starterRelic": "dente_spezzato",
     "primeConditions": [

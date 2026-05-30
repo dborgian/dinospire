@@ -25,6 +25,7 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
   const run = useRunStore((s) => s.run);
   const runDispatch = useRunStore((s) => s.dispatch);
   const { initCombat, clearCombat } = useCombatStore();
+  const getCombat = useCombatStore((s) => s.combat);
 
   const [wrapperState, setWrapperState] = useState<WrapperState>('loading');
   const [errorMsg, setErrorMsg] = useState<string>('');
@@ -163,10 +164,10 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
   function handleVictory() {
     if (!run) return;
 
+    const heroHpAfter = getCombat?.hero.hp ?? run.hp;
     const node = run.map.nodes.find((n) => n.id === nodeId);
     const nodeType = node?.type ?? 'combat';
 
-    // Build reward pool with current deck cards
     const deckCardIds = run.deck.map((c) => c.cardId);
     const rng = createSeededRng(run.seed ^ Date.now());
 
@@ -176,7 +177,7 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
         act: run.act,
         heroId: run.heroId,
         deckCardIds,
-        relicPool: [],          // TODO: populate from unlocked relic pool
+        relicPool: [],
         ascensionLevel: run.ascensionLevel,
       },
       rng,
@@ -187,12 +188,14 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
       type: 'COMBAT_VICTORY',
       rewards: rewardPool,
       statsDelta: { combatsWon: 1 },
+      heroHpAfter,
     });
   }
 
   function handleDefeat() {
+    const heroHpAfter = getCombat?.hero.hp ?? 0;
     clearCombat();
-    runDispatch({ type: 'COMBAT_DEFEAT' });
+    runDispatch({ type: 'COMBAT_DEFEAT', heroHpAfter });
   }
 
   if (wrapperState === 'loading') return <LoadingScreen />;

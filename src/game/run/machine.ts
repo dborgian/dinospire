@@ -27,8 +27,8 @@ import { generateActMap } from './map';
 export type RunAction =
   | { type: 'START_RUN'; heroId: HeroId; seed: number; ascensionLevel?: number; starterDeck: CardInstance[]; starterRelic: RelicId; baseHp: number }
   | { type: 'SELECT_NODE'; nodeId: NodeId }
-  | { type: 'COMBAT_VICTORY'; rewards: Reward[]; statsDelta: Partial<RunStats> }
-  | { type: 'COMBAT_DEFEAT' }
+  | { type: 'COMBAT_VICTORY'; rewards: Reward[]; statsDelta: Partial<RunStats>; heroHpAfter: number }
+  | { type: 'COMBAT_DEFEAT'; heroHpAfter: number }
   | { type: 'PICK_REWARD'; reward: Reward | null }
   | { type: 'RESOLVE_EVENT'; choiceIndex: number; outcomes: CardEffect[] }
   | { type: 'REST_HEAL' }
@@ -243,15 +243,19 @@ export function runReducer(state: RunState, action: RunAction): RunState {
         elitesDefeated: state.stats.elitesDefeated + (action.statsDelta.elitesDefeated ?? 0),
         goldEarned: state.stats.goldEarned + (action.statsDelta.goldEarned ?? 0),
       };
+      // Sync hero HP from combat result, then heal 5 HP post-fight
+      const hpAfterCombat = Math.max(1, action.heroHpAfter);
+      const hpHealed = Math.min(state.maxHp, hpAfterCombat + 5);
       return {
         ...state,
+        hp: hpHealed,
         stats: mergedStats,
         phase: { t: 'reward', pool: action.rewards },
       };
     }
 
     case 'COMBAT_DEFEAT': {
-      return { ...state, phase: { t: 'gameOver', reason: 'death' } };
+      return { ...state, hp: 0, phase: { t: 'gameOver', reason: 'death' } };
     }
 
     case 'PICK_REWARD': {
