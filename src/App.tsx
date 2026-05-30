@@ -6,6 +6,7 @@ import RewardScreen from './ui/reward/RewardScreen';
 import EventScreen from './ui/map/EventScreen';
 import RestScreen from './ui/map/RestScreen';
 import GrowthScreen from './ui/map/GrowthScreen';
+import BossRewardScreen from './ui/map/BossRewardScreen';
 import GameOverScreen from './ui/map/GameOverScreen';
 
 export default function App() {
@@ -32,6 +33,8 @@ export default function App() {
       return <RestScreen />;
     case 'growth':
       return <GrowthScreen />;
+    case 'bossReward':
+      return <BossRewardScreen />;
     case 'gameOver':
       return <GameOverScreen reason={run.phase.reason} />;
     default:
