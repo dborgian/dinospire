@@ -8,17 +8,22 @@ import type { ActMap, MapNode, NodeId, NodeType, EnemyId, EventId } from '@/game
 import { createSeededRng } from '@/game/rng';
 
 // ---------------------------------------------------------------------------
-// Act 1 — fixed 8-floor layout
+// Act 1 — fixed 13-floor layout (extended from original 8)
 // ---------------------------------------------------------------------------
 //
-//  Floor 0 (start)  : 1 × combat
+//  Floor 0  (start) : 1 × combat (tutorial)
 //  Floor 1          : 2 × combat (parallel)
 //  Floor 2          : 1 × event
 //  Floor 3          : 2 × combat (parallel)
-//  Floor 4          : 1 × elite
-//  Floor 5          : 1 × growth (forced evolution)
-//  Floor 6          : 1 × rest
-//  Floor 7 (boss)   : 1 × boss  (nodeId always 'boss_act1')
+//  Floor 4          : 1 × event
+//  Floor 5          : 2 × combat (parallel)
+//  Floor 6          : 1 × elite
+//  Floor 7          : 1 × rest
+//  Floor 8          : 1 × growth (forced evolution)
+//  Floor 9          : 2 × combat (parallel)
+//  Floor 10         : 1 × event
+//  Floor 11         : 1 × rest
+//  Floor 12 (boss)  : 1 × boss  (nodeId always 'boss_act1')
 //
 
 interface FloorSpec {
@@ -27,15 +32,22 @@ interface FloorSpec {
 }
 
 const ACT1_FLOORS: readonly FloorSpec[] = [
-  { floor: 0, slots: ['combat'] },
-  { floor: 1, slots: ['combat', 'combat'] },
-  { floor: 2, slots: ['event'] },
-  { floor: 3, slots: ['combat', 'combat'] },
-  { floor: 4, slots: ['elite'] },
-  { floor: 5, slots: ['growth'] },
-  { floor: 6, slots: ['rest'] },
-  { floor: 7, slots: ['boss'] },
+  { floor: 0,  slots: ['combat'] },
+  { floor: 1,  slots: ['combat', 'combat'] },
+  { floor: 2,  slots: ['event'] },
+  { floor: 3,  slots: ['combat', 'combat'] },
+  { floor: 4,  slots: ['event'] },
+  { floor: 5,  slots: ['combat', 'combat'] },
+  { floor: 6,  slots: ['elite'] },
+  { floor: 7,  slots: ['rest'] },
+  { floor: 8,  slots: ['growth'] },
+  { floor: 9,  slots: ['combat', 'combat'] },
+  { floor: 10, slots: ['event'] },
+  { floor: 11, slots: ['rest'] },
+  { floor: 12, slots: ['boss'] },
 ];
+
+const ACT1_BOSS_FLOOR = 12;
 
 // Normal-tier enemy pool for act 1 (referenced by EnemyDefinition ids in act1.json)
 const ACT1_NORMAL_ENEMIES: readonly EnemyId[] = [
@@ -43,10 +55,14 @@ const ACT1_NORMAL_ENEMIES: readonly EnemyId[] = [
   'dilophosaurus' as EnemyId,
   'pachycephalosaurus' as EnemyId,
   'triceratops_giovane' as EnemyId,
+  'ankylosaurus' as EnemyId,
+  'pterodactyl' as EnemyId,
+  'iguanodon' as EnemyId,
 ];
 
 const ACT1_ELITE_ENEMIES: readonly EnemyId[] = [
   'utahraptor_coppia' as EnemyId,
+  'spinosauro_alpha' as EnemyId,
 ];
 
 const ACT1_BOSS_ENEMY: EnemyId = 'carnotaurus_boss' as EnemyId;
@@ -56,30 +72,45 @@ const ACT1_EVENTS: readonly EventId[] = [
   'pozza_catrame' as EventId,
   'branco_errante' as EventId,
   'roccia_cretacea' as EventId,
+  'fontana_fossile' as EventId,
+  'fossile_antico' as EventId,
+  'tempesta_cretacea' as EventId,
+  'mercante_ombra' as EventId,
 ];
 
 function buildAct1Nodes(seed: number): MapNode[] {
   const rng = createSeededRng(seed);
   const nodes: MapNode[] = [];
 
+  // Shuffle events once per run so each event appears at most once before
+  // the pool wraps (4 event nodes vs 8 events → no repeats expected).
+  const shuffledEvents = rng.shuffle(ACT1_EVENTS) as EventId[];
+  let eventCursor = 0;
+  const nextEvent = (): EventId => {
+    const e = shuffledEvents[eventCursor % shuffledEvents.length] as EventId;
+    eventCursor += 1;
+    return e;
+  };
+
   for (const { floor, slots } of ACT1_FLOORS) {
     for (let col = 0; col < slots.length; col++) {
       const type = slots[col] as NodeType;
-      const id = (floor === 7 ? 'boss_act1' : `1-${floor}-${col}`) as NodeId;
+      const id = (floor === ACT1_BOSS_FLOOR ? 'boss_act1' : `1-${floor}-${col}`) as NodeId;
 
       let enemyIds: EnemyId[] | undefined;
       let eventId: EventId | undefined;
 
       switch (type) {
         case 'combat': {
-          // Floor 0–1: single normal enemy; floor 3: 1–2 normal enemies
-          const count = floor === 3 ? rng.int(1, 2) : 1;
+          // Early floors: 1 enemy. Mid (3-5): 1-2 enemies. Late (9): 1-2 stronger picks.
+          const count = floor >= 3 && rng.next() < 0.5 ? 2 : 1;
           enemyIds = Array.from({ length: count }, () => rng.pick(ACT1_NORMAL_ENEMIES));
           break;
         }
         case 'elite': {
-          // 2 elite enemies
-          enemyIds = [rng.pick(ACT1_ELITE_ENEMIES), rng.pick(ACT1_ELITE_ENEMIES)];
+          // Single elite (the elite definitions already encode "pair" / "alpha"
+          // semantics in their move set — no need to double up)
+          enemyIds = [rng.pick(ACT1_ELITE_ENEMIES)];
           break;
         }
         case 'boss': {
@@ -87,7 +118,7 @@ function buildAct1Nodes(seed: number): MapNode[] {
           break;
         }
         case 'event': {
-          eventId = rng.pick(ACT1_EVENTS);
+          eventId = nextEvent();
           break;
         }
         default:

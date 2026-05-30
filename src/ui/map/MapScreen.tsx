@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { loadCards } from '../../game/content/index';
 import { useRunStore } from '../../stores/runStore';
 import type { Card, MapNode, NodeId, NodeType, EvolutionStage } from '../../game/types';
+import RelicBar from '../shared/RelicBar';
 
 // ---- Constants ----
 const SVG_WIDTH = 320;
@@ -259,7 +260,7 @@ export default function MapScreen() {
 
   if (!run) return null;
 
-  const { map, hp, maxHp, gold, evolutionStage } = run;
+  const { map, hp, maxHp, gold, evolutionStage, relics } = run;
   const nodes = map.nodes;
 
   const floors = nodes.reduce((max, n) => Math.max(max, n.floor), 0) + 1;
@@ -292,42 +293,52 @@ export default function MapScreen() {
     <div className="min-h-screen bg-stone-950 flex flex-col" role="main">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-stone-950/95 backdrop-blur border-b border-stone-800 px-4 py-3">
-        <div className="max-w-sm mx-auto flex items-center justify-between gap-2 flex-wrap">
-          <div>
-            <h1 className="text-amber-400 font-bold text-sm uppercase tracking-wide">
-              Atto 1 — La Giungla Cretacea
-            </h1>
+        <div className="max-w-md mx-auto flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div>
+              <h1 className="text-amber-400 font-bold text-sm uppercase tracking-wide">
+                Atto 1 — La Giungla Cretacea
+              </h1>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-red-400" aria-label={`HP: ${hp} su ${maxHp}`}>
+                ❤ {hp}/{maxHp}
+              </span>
+              <span className="text-yellow-400" aria-label={`Oro: ${gold}`}>
+                💰 {gold}
+              </span>
+              <span
+                className="text-xs bg-stone-800 text-amber-300 px-2 py-0.5 rounded-full uppercase tracking-widest"
+                aria-label={`Stage evoluzione: ${STAGE_LABELS[evolutionStage]}`}
+              >
+                {STAGE_LABELS[evolutionStage]}
+              </span>
+              <button
+                onClick={() => setShowDeck(true)}
+                className="text-xs text-stone-400 hover:text-amber-300 transition-colors px-2 py-0.5 rounded bg-stone-800 hover:bg-stone-700"
+                aria-label="Visualizza mazzo"
+              >
+                🃏 Mazzo
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm('Abbandonare la run in corso?')) clearRun();
+                }}
+                className="text-xs text-stone-500 hover:text-red-400 transition-colors px-1"
+                aria-label="Abbandona run e torna al menù"
+              >
+                ✕
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-red-400" aria-label={`HP: ${hp} su ${maxHp}`}>
-              ❤ {hp}/{maxHp}
-            </span>
-            <span className="text-yellow-400" aria-label={`Oro: ${gold}`}>
-              💰 {gold}
-            </span>
-            <span
-              className="text-xs bg-stone-800 text-amber-300 px-2 py-0.5 rounded-full uppercase tracking-widest"
-              aria-label={`Stage evoluzione: ${STAGE_LABELS[evolutionStage]}`}
-            >
-              {STAGE_LABELS[evolutionStage]}
-            </span>
-            <button
-              onClick={() => setShowDeck(true)}
-              className="text-xs text-stone-400 hover:text-amber-300 transition-colors px-2 py-0.5 rounded bg-stone-800 hover:bg-stone-700"
-              aria-label="Visualizza mazzo"
-            >
-              🃏 Mazzo
-            </button>
-            <button
-              onClick={() => {
-                if (confirm('Abbandonare la run in corso?')) clearRun();
-              }}
-              className="text-xs text-stone-500 hover:text-red-400 transition-colors px-1"
-              aria-label="Abbandona run e torna al menù"
-            >
-              ✕
-            </button>
-          </div>
+          {relics.length > 0 && (
+            <RelicBar
+              relicIds={relics}
+              orientation="horizontal"
+              size={28}
+              className="pt-0.5"
+            />
+          )}
         </div>
       </header>
 

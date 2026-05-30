@@ -17,6 +17,7 @@ import {
 import { contentRegistry } from "@/game/content/index";
 import { HandArea } from "./HandArea";
 import { StatusBadge } from "./StatusBadge";
+import { EnemyHitParticles, type HitBurst, MAX_BURSTS } from "@/three/EnemyHitParticles";
 
 import type {
   EnemyInstance,
@@ -26,7 +27,9 @@ import type {
   Card as CardDef,
   IntentType,
   StatusKey,
+  RelicId,
 } from "@/game/types";
+import RelicBar from "../shared/RelicBar";
 
 // ---------------------------------------------------------------------------
 // Arena background paths — populated by `npm run generate:backgrounds`
@@ -61,6 +64,8 @@ export interface CombatScreenProps {
   gold?: number;
   /** Hero identifier — used to resolve sprite path */
   heroId?: string;
+  /** Relics owned by the run, shown in the HUD */
+  relics?: RelicId[];
 }
 
 // ---------------------------------------------------------------------------
@@ -612,6 +617,7 @@ export function CombatScreen({
   floorLabel = "Atto 1 · Piano 1",
   gold = 0,
   heroId = "borea",
+  relics = [],
 }: CombatScreenProps) {
   const combat = useCombatStore((s) => s.combat);
   const dispatch = useCombatStore((s) => s.dispatch);
@@ -624,6 +630,12 @@ export function CombatScreen({
 
   // Enemy shaking state (iid → boolean)
   const shakingRef = useRef<Set<EnemyId>>(new Set());
+
+  // Particle hit bursts — written by log watcher, read by EnemyHitParticles canvas
+  const burstsRef = useRef<HitBurst[]>([]);
+  const burstCounter = useRef(0);
+  // DOM refs per enemy card (iid → container div) — used to measure screen position
+  const enemyElemRefs = useRef<Map<EnemyId, HTMLDivElement>>(new Map());
 
   // Floating damage numbers keyed per enemy iid
   interface FloatNum { id: number; amount: number; isBlock: boolean; enemyIid: EnemyId }
@@ -705,6 +717,19 @@ export function CombatScreen({
           } else if (targetId) {
             setFloatNums((prev) => [...prev, { id: numId, amount: finalDmg, isBlock: false, enemyIid: targetId as EnemyId }]);
             setTimeout(() => setFloatNums((prev) => prev.filter((n) => n.id !== numId)), 800);
+
+            // Spawn particle hit burst at enemy card position
+            const el = enemyElemRefs.current.get(targetId as EnemyId);
+            if (el) {
+              const rect = el.getBoundingClientRect();
+              const burst: HitBurst = {
+                id: ++burstCounter.current,
+                nx: (rect.left + rect.width * 0.5) / window.innerWidth,
+                ny: (rect.top  + rect.height * 0.35) / window.innerHeight,
+                startTime: Date.now() / 1000,
+              };
+              burstsRef.current = [...burstsRef.current.slice(-(MAX_BURSTS - 1)), burst];
+            }
           }
         }
       }
@@ -889,6 +914,16 @@ export function CombatScreen({
       <div className="relative z-10 flex flex-1 min-h-0">
         {/* Sinistra — HeroZone (35%) */}
         <div className="w-[35%] relative">
+          {/* Relic strip — top-left corner of the hero zone */}
+          {relics.length > 0 && (
+            <div className="absolute top-2 left-2 z-20 max-h-[88%] overflow-y-auto pr-1">
+              <RelicBar
+                relicIds={relics}
+                orientation="vertical"
+                size={34}
+              />
+            </div>
+          )}
           <HeroZone
             heroId={heroId}
             hp={combat.hero.hp}
@@ -906,7 +941,14 @@ export function CombatScreen({
           aria-label="Area nemici"
         >
           {liveEnemies.map((enemy) => (
-            <div key={enemy.iid} className="relative">
+            <div
+              key={enemy.iid}
+              className="relative"
+              ref={(el) => {
+                if (el) enemyElemRefs.current.set(enemy.iid, el);
+                else enemyElemRefs.current.delete(enemy.iid);
+              }}
+            >
               <EnemyCard
                 enemy={enemy}
                 onClick={() => handleEnemyClick(enemy.iid)}
@@ -999,6 +1041,9 @@ export function CombatScreen({
           </>
         )}
       </AnimatePresence>
+
+      {/* Particle hit effects — transparent Three.js canvas overlay */}
+      <EnemyHitParticles burstsRef={burstsRef} />
     </div>
   );
 }

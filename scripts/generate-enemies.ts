@@ -66,6 +66,26 @@ const ENEMY_DESC: Record<string, EnemyEntry> = {
     scene: 'The pair of Utahraptors flank from both sides simultaneously, one leaping from the left with claws extended and the other crouching low from the right, their feathers ruffled and electric-blue tips glowing, set against the amber glow of a volcanic sunset',
     traitLabel: 'Caccia in Coppia',
   },
+  ankylosaurus: {
+    dino: 'An Ankylosaurus — a low-slung armoured herbivore the size of a tank, with a back covered in interlocking bony plates and spikes in shades of slate-grey and moss-green, four short stout legs, and an enormous club-tipped tail that drags through the dust',
+    scene: 'The Ankylosaurus crouches low and braces all four legs against the earth, armoured plates catching dim greenish light filtering through ancient ferns, its club tail half-raised in warning, eyes narrowed beneath a thick brow ridge, set against a quiet primordial forest at twilight',
+    traitLabel: 'Corazzato',
+  },
+  pterodactyl: {
+    dino: 'A Pterodactyl — a slender flying reptile with leathery brown wings stretched between elongated finger bones, a narrow toothed beak, a small crest atop its skull, sharp talons curled beneath, and piercing yellow predator eyes',
+    scene: 'The Pterodactyl banks mid-dive with wings half-folded, swooping down through a canyon of red sandstone cliffs at sunset, dust trails curling behind its wingtips, beak open in a shriek, the sky behind it painted in molten oranges and deep purples',
+    traitLabel: 'Sciamatore Aereo',
+  },
+  iguanodon: {
+    dino: 'An Iguanodon — a powerfully built bipedal herbivore the size of a small bus, with thick muscular hindlegs, shorter forelimbs each ending in a deadly spiked thumb claw, smooth olive-brown skin with a darker dorsal stripe, and an alert intelligent gaze',
+    scene: 'The Iguanodon rises onto its hind legs, spiked thumb raised in challenge, a low-angle hero shot from the ground looking up as it silhouettes against a stormy grey sky with shafts of yellow light breaking through the clouds, mud splattered across its flanks',
+    traitLabel: 'Pollice Letale',
+  },
+  spinosauro_alpha: {
+    dino: 'A massive Spinosaurus Alpha — a colossal semi-aquatic theropod with a tall iridescent sail running down its back, crocodile-like elongated jaws lined with conical teeth, scales in deep indigo-purple fading to bronze underbelly, scarred from many battles, and one milky-blind eye',
+    scene: 'The Spinosaurus Alpha emerges from a murky swamp half-submerged, its enormous sail breaking the water as steam rises around it, glowing bioluminescent water droplets cascading down its flanks, the surviving good eye locked on the viewer with apex-predator intent, set in a misty mangrove ruin at dusk',
+    traitLabel: 'Elite — Cacciatore di Sangue',
+  },
   carnotaurus_boss: {
     dino: 'A massive Carnotaurus — a heavily built theropod with two thick bull-like horns above its eyes, jet-black scales with deep crimson banding along the flanks, tiny vestigial arms, a barrel-thick neck, and burning red eyes that glow like embers in the dark',
     scene: 'The Carnotaurus steps forward from absolute darkness, only its glowing red eyes and the outline of its horns visible at first, the ground cracking under each footfall, heat shimmering around its body as if the very air burns near it — a true apex predator revealing itself from the shadows of a ruined volcanic arena',

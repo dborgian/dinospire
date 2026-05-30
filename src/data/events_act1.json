@@ -9,8 +9,10 @@
         "description": "Potresti trovare qualcosa di prezioso... o di pericoloso.",
         "outcomes": [
           {
-            "description": "Una carta rara emerge dall'uovo!",
-            "effects": [],
+            "description": "Un piccolo Compagno emerge dall'uovo e si unisce a te!",
+            "effects": [
+              { "kind": "addCardToDeck", "cardId": "compagno_neutro", "count": 1 }
+            ],
             "probability": 0.5
           },
           {
@@ -42,11 +44,14 @@
     "choices": [
       {
         "label": "Immergi una carta",
-        "description": "Potenzia una carta ma perdi una reliquia.",
+        "description": "Potenzia una carta casuale del mazzo, ma il catrame ti ferisce (-6 HP).",
         "outcomes": [
           {
-            "description": "La carta si potenzia, ma la reliquia sprofonda nel catrame.",
-            "effects": [],
+            "description": "Una carta si potenzia, ma il catrame ti scotta.",
+            "effects": [
+              { "kind": "upgradeRandomCard" },
+              { "kind": "damage", "amount": 6, "target": "self" }
+            ],
             "probability": 1
           }
         ]
@@ -103,11 +108,13 @@
     "choices": [
       {
         "label": "Tocca la roccia",
-        "description": "Trasforma una carta in versione Cretacea potenziata.",
+        "description": "Rimuovi una carta casuale dal mazzo (snellisci il mazzo).",
         "outcomes": [
           {
-            "description": "La carta si trasforma!",
-            "effects": [],
+            "description": "Una carta sbiadisce e svanisce nella roccia.",
+            "effects": [
+              { "kind": "removeRandomCard" }
+            ],
             "probability": 1
           }
         ]
@@ -118,6 +125,184 @@
         "outcomes": [
           {
             "description": "Prosegui.",
+            "effects": [],
+            "probability": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fontana_fossile",
+    "title": "Fontana Fossile",
+    "description": "Una fontana naturale d'acqua minerale sgorga da un teschio fossilizzato. L'acqua brilla di un riflesso ambrato.",
+    "choices": [
+      {
+        "label": "Bevi a lungo",
+        "description": "Curi 22 HP.",
+        "outcomes": [
+          {
+            "description": "L'acqua antica ti rinvigorisce.",
+            "effects": [
+              { "kind": "heal", "amount": 22 }
+            ],
+            "probability": 1
+          }
+        ]
+      },
+      {
+        "label": "Lavati le ferite",
+        "description": "Curi 10 HP e guadagni +4 HP massimi permanenti.",
+        "outcomes": [
+          {
+            "description": "Le ferite si rimarginano. Ti senti più forte.",
+            "effects": [
+              { "kind": "gainMaxHp", "amount": 4 },
+              { "kind": "heal", "amount": 10 }
+            ],
+            "probability": 1
+          }
+        ]
+      },
+      {
+        "label": "Ignora la fontana",
+        "description": "Continui senza fermarti.",
+        "outcomes": [
+          {
+            "description": "Vai avanti.",
+            "effects": [],
+            "probability": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fossile_antico",
+    "title": "Fossile Antico",
+    "description": "Tra le pietre intravedi un fossile incastonato con un manufatto ancestrale. Estrarlo costa fatica.",
+    "choices": [
+      {
+        "label": "Estrai il manufatto",
+        "description": "Paghi 12 HP e ottieni una reliquia (non comune).",
+        "outcomes": [
+          {
+            "description": "Stringi il manufatto: una reliquia entra nel tuo inventario.",
+            "effects": [
+              { "kind": "damage", "amount": 12, "target": "self" },
+              { "kind": "gainRelic", "tier": "uncommon" }
+            ],
+            "probability": 1
+          }
+        ]
+      },
+      {
+        "label": "Cerca tra le rocce",
+        "description": "Forse trovi qualcosa di meno prezioso.",
+        "outcomes": [
+          {
+            "description": "Trovi una piccola scorta: +25 oro.",
+            "effects": [
+              { "kind": "gainGold", "amount": 25 }
+            ],
+            "probability": 0.7
+          },
+          {
+            "description": "Una scheggia ti ferisce: -4 HP.",
+            "effects": [
+              { "kind": "damage", "amount": 4, "target": "self" }
+            ],
+            "probability": 0.3
+          }
+        ]
+      },
+      {
+        "label": "Lascia stare",
+        "description": "Non vale la pena.",
+        "outcomes": [
+          {
+            "description": "Prosegui.",
+            "effects": [],
+            "probability": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tempesta_cretacea",
+    "title": "Tempesta Cretacea",
+    "description": "Un fronte temporalesco di lampi viola si addensa sopra di te. L'aria crepita di energia antica.",
+    "choices": [
+      {
+        "label": "Affronta la tempesta",
+        "description": "Subisci 8 HP. Una carta casuale viene potenziata e ottieni 18 oro.",
+        "outcomes": [
+          {
+            "description": "Il fulmine ti attraversa e plasma una carta. Trovi delle pepite cadute.",
+            "effects": [
+              { "kind": "damage", "amount": 8, "target": "self" },
+              { "kind": "upgradeRandomCard" },
+              { "kind": "gainGold", "amount": 18 }
+            ],
+            "probability": 1
+          }
+        ]
+      },
+      {
+        "label": "Cerca riparo",
+        "description": "Aspetti che passi. Curi 6 HP.",
+        "outcomes": [
+          {
+            "description": "Riposi al riparo della tempesta.",
+            "effects": [
+              { "kind": "heal", "amount": 6 }
+            ],
+            "probability": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mercante_ombra",
+    "title": "Mercante dell'Ombra",
+    "description": "Un mercante incappucciato ti offre uno scambio non convenzionale. Non chiede oro: chiede sangue.",
+    "choices": [
+      {
+        "label": "Vendi i tuoi ricordi",
+        "description": "Rimuovi una carta casuale e ricevi 30 oro.",
+        "outcomes": [
+          {
+            "description": "Il mercante prende la carta e ti consegna le monete.",
+            "effects": [
+              { "kind": "removeRandomCard" },
+              { "kind": "gainGold", "amount": 30 }
+            ],
+            "probability": 1
+          }
+        ]
+      },
+      {
+        "label": "Forgia un ricordo",
+        "description": "Paghi 8 HP per potenziare una carta casuale.",
+        "outcomes": [
+          {
+            "description": "Il mercante intinge la carta nel tuo sangue e la trasforma.",
+            "effects": [
+              { "kind": "damage", "amount": 8, "target": "self" },
+              { "kind": "upgradeRandomCard" }
+            ],
+            "probability": 1
+          }
+        ]
+      },
+      {
+        "label": "Vai via",
+        "description": "Diffidi del mercante.",
+        "outcomes": [
+          {
+            "description": "Lo lasci alle sue ombre.",
             "effects": [],
             "probability": 1
           }

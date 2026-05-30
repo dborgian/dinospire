@@ -213,6 +213,67 @@
     "flavorIt": "La difesa migliore è saper cogliere il momento."
   },
   {
+    "id": "zampata_pesante_b",
+    "name": { "it": "Zampata Pesante" },
+    "hero": "borea",
+    "cost": 1,
+    "type": "attack",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["erbivoro", "ankylosauro"],
+    "effects": [
+      { "kind": "damage", "amount": 6, "target": "enemy" },
+      { "kind": "applyStatus", "status": "weak", "stacks": 1, "target": "enemy" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "damage", "amount": 9, "target": "enemy" },
+        { "kind": "applyStatus", "status": "weak", "stacks": 2, "target": "enemy" }
+      ]
+    },
+    "flavorIt": "La zampa che indebolisce prepara il colpo di coda."
+  },
+  {
+    "id": "mandria_compatta_b",
+    "name": { "it": "Mandria Compatta" },
+    "hero": "borea",
+    "cost": 2,
+    "type": "skill",
+    "rarity": "uncommon",
+    "act": 1,
+    "tags": ["erbivoro", "ankylosauro", "mandria"],
+    "effects": [
+      { "kind": "block", "amount": 8 },
+      { "kind": "draw", "n": 2 }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "block", "amount": 10 },
+        { "kind": "draw", "n": 2 }
+      ]
+    },
+    "flavorIt": "Uniti sotto la corazza del più grande, il branco sopravvive."
+  },
+  {
+    "id": "resistenza_ancestrale_b",
+    "name": { "it": "Resistenza Ancestrale" },
+    "hero": "borea",
+    "cost": 2,
+    "type": "power",
+    "rarity": "rare",
+    "act": 1,
+    "tags": ["erbivoro", "ankylosauro", "mandria"],
+    "effects": [
+      { "kind": "applyStatus", "status": "dexterity", "stacks": 2, "target": "self" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "applyStatus", "status": "dexterity", "stacks": 3, "target": "self" }
+      ]
+    },
+    "flavorIt": "Milioni di anni di evoluzione: ogni piastrone osseo è una lezione imparata."
+  },
+  {
     "id": "fortezza_b",
     "name": { "it": "Fortezza" },
     "hero": "borea",

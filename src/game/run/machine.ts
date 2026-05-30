@@ -19,6 +19,24 @@ import type {
   RunStats,
 } from '@/game/types';
 import { generateActMap } from './map';
+import { createSeededRng } from '@/game/rng';
+
+// ---------------------------------------------------------------------------
+// Event-only relic pool — pickable via `gainRelic` outcomes when no specific
+// relicId is provided. Kept here (not in JSON) to avoid an async lookup inside
+// the pure reducer.
+// ---------------------------------------------------------------------------
+const EVENT_RELIC_POOL_COMMON: readonly RelicId[] = [
+  'ambra_predatoria' as RelicId,
+  'cuore_di_pietra' as RelicId,
+];
+const EVENT_RELIC_POOL_UNCOMMON: readonly RelicId[] = [
+  'cranio_fossile' as RelicId,
+  'pelle_resistente' as RelicId,
+];
+const EVENT_RELIC_POOL_RARE: readonly RelicId[] = [
+  'zanna_del_re' as RelicId,
+];
 
 // ---------------------------------------------------------------------------
 // Action definitions
@@ -33,6 +51,7 @@ export type RunAction =
   | { type: 'RESOLVE_EVENT'; choiceIndex: number; outcomes: CardEffect[] }
   | { type: 'REST_HEAL' }
   | { type: 'REST_UPGRADE'; cardIid: CardInstanceId }
+  | { type: 'REST_REMOVE'; cardIid: CardInstanceId }
   | { type: 'BUY'; item: Reward }
   | { type: 'GROWTH_EVOLVE' }
   | { type: 'ACT_COMPLETE'; nextAct: 2 | 3 }
@@ -116,7 +135,14 @@ function applyReward(state: RunState, reward: Reward): RunState {
 // Event effect application helpers
 // ---------------------------------------------------------------------------
 
-function applyEventEffect(state: RunState, effect: CardEffect): RunState {
+function eventRng(state: RunState, salt: number): ReturnType<typeof createSeededRng> {
+  // Derive a per-event seed from run seed + visited node count + salt so
+  // repeated rolls within the same event diverge.
+  const visited = state.map.nodes.filter((n) => n.visited).length;
+  return createSeededRng((state.seed ^ (visited * 0x9e3779b9) ^ salt) >>> 0);
+}
+
+function applyEventEffect(state: RunState, effect: CardEffect, idx: number): RunState {
   switch (effect.kind) {
     case 'damage': {
       const amount = typeof effect.amount === 'number' ? effect.amount : 0;
@@ -135,6 +161,48 @@ function applyEventEffect(state: RunState, effect: CardEffect): RunState {
         temporary: effect.temporary ?? false,
       }));
       return { ...state, deck: [...state.deck, ...newCards] };
+    }
+    case 'gainGold': {
+      return {
+        ...state,
+        gold: state.gold + effect.amount,
+        stats: { ...state.stats, goldEarned: state.stats.goldEarned + effect.amount },
+      };
+    }
+    case 'gainMaxHp': {
+      const newMax = state.maxHp + effect.amount;
+      return { ...state, maxHp: newMax, hp: Math.min(newMax, state.hp + effect.amount) };
+    }
+    case 'gainRelic': {
+      if (effect.relicId) {
+        if (state.relics.includes(effect.relicId)) return state;
+        return { ...state, relics: [...state.relics, effect.relicId] };
+      }
+      const pool = effect.tier === 'rare'
+        ? EVENT_RELIC_POOL_RARE
+        : effect.tier === 'uncommon'
+          ? EVENT_RELIC_POOL_UNCOMMON
+          : EVENT_RELIC_POOL_COMMON;
+      const candidates = pool.filter((r) => !state.relics.includes(r));
+      if (candidates.length === 0) return state;
+      const picked = eventRng(state, idx + 101).pick(candidates);
+      return { ...state, relics: [...state.relics, picked] };
+    }
+    case 'removeRandomCard': {
+      // Avoid removing starter cards (heuristic: keep at least 5 cards in deck)
+      const removable = state.deck.filter((c) => !c.upgraded || true);
+      if (state.deck.length <= 5 || removable.length === 0) return state;
+      const target = eventRng(state, idx + 211).pick(removable);
+      return { ...state, deck: state.deck.filter((c) => c.iid !== target.iid) };
+    }
+    case 'upgradeRandomCard': {
+      const upgradable = state.deck.filter((c) => !c.upgraded);
+      if (upgradable.length === 0) return state;
+      const target = eventRng(state, idx + 311).pick(upgradable);
+      return {
+        ...state,
+        deck: state.deck.map((c) => (c.iid === target.iid ? { ...c, upgraded: true } : c)),
+      };
     }
     case 'gainEnergy':
     case 'draw':
@@ -300,7 +368,7 @@ export function runReducer(state: RunState, action: RunAction): RunState {
 
       // Apply all outcome effects in sequence
       const stateAfterEffects = action.outcomes.reduce(
-        (s, effect) => applyEventEffect(s, effect),
+        (s, effect, i) => applyEventEffect(s, effect, i),
         state,
       );
 
@@ -323,6 +391,16 @@ export function runReducer(state: RunState, action: RunAction): RunState {
         card.iid === action.cardIid ? { ...card, upgraded: true } : card,
       );
       return { ...state, deck: updatedDeck, phase: { t: 'map' } };
+    }
+
+    case 'REST_REMOVE': {
+      if (state.phase.t !== 'rest') return state;
+      if (state.deck.length <= 5) return state;
+      return {
+        ...state,
+        deck: state.deck.filter((c) => c.iid !== action.cardIid),
+        phase: { t: 'map' },
+      };
     }
 
     case 'BUY': {

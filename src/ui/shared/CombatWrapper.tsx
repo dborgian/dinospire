@@ -236,6 +236,7 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
       floorLabel={floorLabel}
       gold={run?.gold ?? 0}
       heroId={run?.heroId ?? 'borea'}
+      relics={run?.relics ?? []}
     />
   );
 }

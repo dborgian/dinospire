@@ -37,19 +37,27 @@ export default function EventScreen({ eventId }: EventScreenProps) {
   }
 
   function handleChoice(choiceIndex: number) {
-    if (!eventDef) return;
+    if (!eventDef || !run) return;
 
     const choice = eventDef.choices[choiceIndex];
-    if (!choice) return;
+    if (!choice || choice.outcomes.length === 0) return;
 
-    // Resolve outcome: pick first (deterministic for MVP; random weighting TODO)
-    // A proper implementation would use the seeded RNG from run.seed
-    const outcome = choice.outcomes[0];
-    if (!outcome) return;
+    // Weighted random pick using a seed derived from run + node id so the same
+    // outcome is reproducible if the player retries the same seed.
+    const visitedCount = run.map.nodes.filter((n) => n.visited).length;
+    const rollSeed = (run.seed ^ (visitedCount * 0x85ebca6b) ^ (choiceIndex * 0xc2b2ae35)) >>> 0;
+    const totalWeight = choice.outcomes.reduce((s, o) => s + (o.probability ?? 1), 0);
+    let roll = ((rollSeed % 1_000_000) / 1_000_000) * totalWeight;
+    let picked = choice.outcomes[choice.outcomes.length - 1]!;
+    for (const o of choice.outcomes) {
+      const w = o.probability ?? 1;
+      if (roll < w) { picked = o; break; }
+      roll -= w;
+    }
 
-    const effects = outcome.effects as CardEffect[];
+    const effects = picked.effects as CardEffect[];
 
-    setOutcomeText(outcome.description);
+    setOutcomeText(picked.description);
 
     // Small delay so the player reads the outcome before returning to map
     setTimeout(() => {
@@ -58,7 +66,7 @@ export default function EventScreen({ eventId }: EventScreenProps) {
         choiceIndex,
         outcomes: effects,
       });
-    }, 1600);
+    }, 1800);
   }
 
   return (

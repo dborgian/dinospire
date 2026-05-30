@@ -187,6 +187,164 @@
     ]
   },
   {
+    "id": "ankylosaurus",
+    "name": { "it": "Anchilosauro" },
+    "taxonGroup": "ankylosauro",
+    "diet": "erbivoro",
+    "hp": 45,
+    "tier": "normal",
+    "art": { "phylopicUuid": "" },
+    "movePattern": "sequential",
+    "moves": [
+      {
+        "id": "corazza",
+        "intent": { "type": "defend", "value": 8, "description": "Corazza: +8 Block + 2 Spine su di sé" },
+        "effects": [
+          { "kind": "block", "amount": 8 },
+          { "kind": "applyStatus", "status": "thorns", "stacks": 2, "target": "self" }
+        ]
+      },
+      {
+        "id": "coda_clava",
+        "intent": { "type": "attack", "value": 10, "description": "Coda-clava: 10 dmg" },
+        "effects": [
+          { "kind": "damage", "amount": 10, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "rinforzo",
+        "intent": { "type": "defend", "value": 12, "description": "Rinforzo: +12 Block" },
+        "effects": [
+          { "kind": "block", "amount": 12 }
+        ]
+      },
+      {
+        "id": "coda_spazzata",
+        "intent": { "type": "attack", "value": 6, "description": "Coda spazzata: 6 dmg + 1 Fragile" },
+        "effects": [
+          { "kind": "damage", "amount": 6, "target": "enemy" },
+          { "kind": "applyStatus", "status": "frail", "stacks": 1, "target": "enemy" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pterodactyl",
+    "name": { "it": "Pterodattilo" },
+    "taxonGroup": "theropode",
+    "diet": "carnivoro",
+    "hp": 22,
+    "tier": "normal",
+    "art": { "phylopicUuid": "" },
+    "movePattern": "sequential",
+    "moves": [
+      {
+        "id": "picchiata",
+        "intent": { "type": "attack", "value": 10, "description": "Picchiata: 5+5" },
+        "effects": [
+          { "kind": "repeat", "times": 2, "effect": { "kind": "damage", "amount": 5, "target": "enemy" } }
+        ]
+      },
+      {
+        "id": "stridio",
+        "intent": { "type": "debuff", "description": "Stridio: 2 Debole" },
+        "effects": [
+          { "kind": "applyStatus", "status": "weak", "stacks": 2, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "becco_rapido",
+        "intent": { "type": "attack", "value": 8, "description": "Becco rapido: 4+4 + 1 Debole" },
+        "effects": [
+          { "kind": "repeat", "times": 2, "effect": { "kind": "damage", "amount": 4, "target": "enemy" } },
+          { "kind": "applyStatus", "status": "weak", "stacks": 1, "target": "enemy" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "iguanodon",
+    "name": { "it": "Iguanodonte" },
+    "taxonGroup": "ceratopside",
+    "diet": "erbivoro",
+    "hp": 35,
+    "tier": "normal",
+    "art": { "phylopicUuid": "" },
+    "movePattern": "sequential",
+    "moves": [
+      {
+        "id": "concentrazione",
+        "intent": { "type": "buff", "description": "Concentrazione: +2 Forza" },
+        "effects": [
+          { "kind": "applyStatus", "status": "strength", "stacks": 2, "target": "self" }
+        ]
+      },
+      {
+        "id": "artiglio_pollice",
+        "intent": { "type": "attack", "value": 9, "description": "Artiglio: 9 + Forza" },
+        "effects": [
+          { "kind": "damage", "amount": 9, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "carica_pesante",
+        "intent": { "type": "attack", "value": 13, "description": "Carica pesante: 13 + Forza" },
+        "effects": [
+          { "kind": "damage", "amount": 13, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "guardia",
+        "intent": { "type": "defend", "value": 7, "description": "Guardia: +7 Block" },
+        "effects": [
+          { "kind": "block", "amount": 7 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "spinosauro_alpha",
+    "name": { "it": "Spinosauro Alpha" },
+    "taxonGroup": "spinosauride",
+    "diet": "carnivoro",
+    "hp": 62,
+    "tier": "elite",
+    "art": { "phylopicUuid": "" },
+    "movePattern": "sequential",
+    "moves": [
+      {
+        "id": "ruggito_caccia",
+        "intent": { "type": "buff", "description": "Ruggito: +1 Forza" },
+        "effects": [
+          { "kind": "applyStatus", "status": "strength", "stacks": 1, "target": "self" }
+        ]
+      },
+      {
+        "id": "morso_lacerante",
+        "intent": { "type": "attack", "value": 13, "description": "Morso lacerante: 13 + 2 Sanguinamento" },
+        "effects": [
+          { "kind": "damage", "amount": 13, "target": "enemy" },
+          { "kind": "applyStatus", "status": "bleed", "stacks": 2, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "artigli_doppi",
+        "intent": { "type": "attack", "value": 14, "description": "Artigli: 7+7" },
+        "effects": [
+          { "kind": "repeat", "times": 2, "effect": { "kind": "damage", "amount": 7, "target": "enemy" } }
+        ]
+      },
+      {
+        "id": "rugito_furia",
+        "intent": { "type": "debuff", "description": "Rugito di furia: 2 Vulnerabile + 1 Debole" },
+        "effects": [
+          { "kind": "applyStatus", "status": "vulnerable", "stacks": 2, "target": "enemy" },
+          { "kind": "applyStatus", "status": "weak", "stacks": 1, "target": "enemy" }
+        ]
+      }
+    ]
+  },
+  {
     "id": "carnotaurus_boss",
     "name": { "it": "Carnotaurus — Predatore Furtivo" },
     "taxonGroup": "theropode",

@@ -502,7 +502,14 @@ function resolveEffect(
     case 'block': {
       const base = evalExpr(effect.amount, state, actorIsHero, targetId);
 
-      // Only hero gains block via card effects; enemy block is set by their moves
+      if (!actorIsHero && targetId) {
+        // Enemy gaining block from its own move — route to the enemy, no frail/dex modifiers
+        const blockAmt = Math.max(0, base);
+        const next = updateEnemy(state, targetId, (e) => ({ ...e, block: e.block + blockAmt }));
+        return logEvent(next, 'block', { base, blockAmt, enemyId: targetId });
+      }
+
+      // Hero gaining block
       let blockAmt = base;
 
       // Dexterity adds flat bonus
@@ -718,6 +725,17 @@ function resolveEffect(
       }
       return s;
     }
+
+    // ------------------------------------------------------------------
+    // Event-only effects — resolved at run level (machine.ts).
+    // No-ops in combat context to keep the union exhaustive.
+    // ------------------------------------------------------------------
+    case 'gainGold':
+    case 'gainMaxHp':
+    case 'gainRelic':
+    case 'removeRandomCard':
+    case 'upgradeRandomCard':
+      return state;
 
     default:
       effect satisfies never;

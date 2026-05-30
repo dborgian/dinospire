@@ -63,7 +63,13 @@ export type CardEffect =
   | { kind: 'heal'; amount: number | DynExpr }
   | { kind: 'conditional'; if: Predicate; then: CardEffect[]; else?: CardEffect[] }
   | { kind: 'synergy'; minCards: number; tags: CardTag[]; bonus: CardEffect[] }
-  | { kind: 'repeat'; times: number | DynExpr; effect: CardEffect };
+  | { kind: 'repeat'; times: number | DynExpr; effect: CardEffect }
+  // ---- Event-only effects (no-op in combat context) ----
+  | { kind: 'gainGold'; amount: number }
+  | { kind: 'gainMaxHp'; amount: number }
+  | { kind: 'gainRelic'; relicId?: RelicId; tier?: 'common' | 'uncommon' | 'rare' }
+  | { kind: 'removeRandomCard' }
+  | { kind: 'upgradeRandomCard' };
 
 export type TriggerKey =
   | 'on_battle_start' | 'on_turn_start' | 'on_turn_end'
