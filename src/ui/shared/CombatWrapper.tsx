@@ -234,6 +234,7 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
       onAbandon={handleAbandon}
       floorLabel={floorLabel}
       gold={run?.gold ?? 0}
+      heroId={run?.heroId ?? 'borea'}
     />
   );
 }

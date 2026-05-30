@@ -157,7 +157,7 @@ function FullCard({
         exhaustStyle,
         "transition-all duration-150",
       ].filter(Boolean).join(" ")}
-      style={{ width: "clamp(100px, 7.5vw, 140px)", aspectRatio: "2/3" }}
+      style={{ width: "clamp(120px, 10vw, 200px)", aspectRatio: "5/7" }}
       onClick={onClick}
       role="button"
       tabIndex={isExhausted ? -1 : 0}
@@ -263,7 +263,7 @@ function HtmlCard({
         exhaustStyle,
         "transition-all duration-150",
       ].filter(Boolean).join(" ")}
-      style={{ width: "clamp(100px, 7.5vw, 140px)", aspectRatio: "2/3" }}
+      style={{ width: "clamp(120px, 10vw, 200px)", aspectRatio: "5/7" }}
       onClick={onClick}
       role="button"
       tabIndex={isExhausted ? -1 : 0}
@@ -377,7 +377,7 @@ export function Card({
 
   const hoverAnim: Pick<MotionProps, "whileHover"> = prefersReduced
     ? {}
-    : { whileHover: { y: -12, scale: 1.08 } };
+    : { whileHover: { y: -40, scale: 1.5 } };
 
   const transitionProp: Pick<MotionProps, "transition"> = prefersReduced
     ? {}
