@@ -10,17 +10,18 @@
     "movePattern": "sequential",
     "moves": [
       {
-        "id": "morso1",
-        "intent": { "type": "attack", "value": 4, "description": "Morde per 4" },
+        "id": "morsetto_branco",
+        "intent": { "type": "attack", "value": 4, "description": "Morsetti branco: 2+2" },
         "effects": [
-          { "kind": "damage", "amount": 4, "target": "enemy" }
+          { "kind": "repeat", "times": 2, "effect": { "kind": "damage", "amount": 2, "target": "enemy" } }
         ]
       },
       {
-        "id": "morso2",
-        "intent": { "type": "attack", "value": 4, "description": "Morde per 4" },
+        "id": "morso_coordinato",
+        "intent": { "type": "attack", "value": 5, "description": "Morso coordinato: 5" },
         "effects": [
-          { "kind": "damage", "amount": 4, "target": "enemy" }
+          { "kind": "damage", "amount": 5, "target": "enemy" },
+          { "kind": "applyStatus", "status": "weak", "stacks": 1, "target": "enemy" }
         ]
       }
     ]
@@ -36,18 +37,25 @@
     "movePattern": "sequential",
     "moves": [
       {
-        "id": "sputo",
-        "intent": { "type": "debuff", "value": 2, "description": "Sputa veleno: 3 danni + 2 Veleno" },
+        "id": "sputo_velenoso",
+        "intent": { "type": "debuff", "value": 2, "description": "Sputa veleno: 2 dmg + 3 Veleno" },
         "effects": [
-          { "kind": "damage", "amount": 3, "target": "enemy" },
-          { "kind": "applyStatus", "status": "poison", "stacks": 2, "target": "enemy" }
+          { "kind": "damage", "amount": 2, "target": "enemy" },
+          { "kind": "applyStatus", "status": "poison", "stacks": 3, "target": "enemy" }
         ]
       },
       {
-        "id": "morso",
+        "id": "morso_potente",
         "intent": { "type": "attack", "value": 8, "description": "Morde per 8" },
         "effects": [
           { "kind": "damage", "amount": 8, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "sputo_rapido",
+        "intent": { "type": "debuff", "description": "Sputa: 2 Veleno" },
+        "effects": [
+          { "kind": "applyStatus", "status": "poison", "stacks": 2, "target": "enemy" }
         ]
       }
     ]
@@ -71,16 +79,16 @@
       },
       {
         "id": "testata",
-        "intent": { "type": "attack", "value": 9, "description": "Testata per 9" },
+        "intent": { "type": "attack", "value": 12, "description": "Testata potenziata: 12" },
         "effects": [
-          { "kind": "damage", "amount": 9, "target": "enemy" }
+          { "kind": "damage", "amount": 12, "target": "enemy" }
         ]
       },
       {
-        "id": "testata2",
-        "intent": { "type": "attack", "value": 9, "description": "Testata per 9" },
+        "id": "testata_rapida",
+        "intent": { "type": "attack", "value": 7, "description": "Testata: 7" },
         "effects": [
-          { "kind": "damage", "amount": 9, "target": "enemy" }
+          { "kind": "damage", "amount": 7, "target": "enemy" }
         ]
       }
     ]
@@ -97,7 +105,7 @@
     "moves": [
       {
         "id": "difesa",
-        "intent": { "type": "defend", "value": 10, "description": "Si difende: 10 block" },
+        "intent": { "type": "defend", "value": 10, "description": "Si difende: +10 Block" },
         "effects": [
           { "kind": "block", "amount": 10 }
         ]
@@ -125,19 +133,22 @@
         "id": "branco_combo",
         "intent": { "type": "attack", "value": 9, "description": "Attacco di branco: 3+3+3" },
         "effects": [
-          {
-            "kind": "repeat",
-            "times": 3,
-            "effect": { "kind": "damage", "amount": 3, "target": "enemy" }
-          }
+          { "kind": "repeat", "times": 3, "effect": { "kind": "damage", "amount": 3, "target": "enemy" } }
         ]
       },
       {
         "id": "mordi_fuggi",
-        "intent": { "type": "attack", "value": 11, "description": "Mordi e fuggi: 6+5 block" },
+        "intent": { "type": "attack", "value": 11, "description": "Mordi e fuggi: 6 dmg + 5 Block" },
         "effects": [
           { "kind": "damage", "amount": 6, "target": "enemy" },
           { "kind": "block", "amount": 5 }
+        ]
+      },
+      {
+        "id": "coordinazione",
+        "intent": { "type": "debuff", "description": "Coordinazione: 2 Debole" },
+        "effects": [
+          { "kind": "applyStatus", "status": "weak", "stacks": 2, "target": "enemy" }
         ]
       }
     ]
@@ -157,18 +168,14 @@
         "intent": { "type": "unknown", "hidden": true, "description": "???" },
         "effects": [
           { "kind": "damage", "amount": 14, "target": "enemy" },
-          { "kind": "applyStatus", "status": "dodge", "stacks": 1, "target": "self" }
+          { "kind": "applyStatus", "status": "weak", "stacks": 2, "target": "enemy" }
         ]
       },
       {
         "id": "squarcio",
         "intent": { "type": "attack", "value": 16, "description": "Squarcio: 8+8" },
         "effects": [
-          {
-            "kind": "repeat",
-            "times": 2,
-            "effect": { "kind": "damage", "amount": 8, "target": "enemy" }
-          }
+          { "kind": "repeat", "times": 2, "effect": { "kind": "damage", "amount": 8, "target": "enemy" } }
         ]
       },
       {
