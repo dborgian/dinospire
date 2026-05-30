@@ -575,6 +575,16 @@ function resolveEffect(
         if (live.length === 0) return state;
         const rng = createSeededRng(state.seed + state.turn + 7);
         return applyToEnemy(state, rng.pick(live).iid);
+      } else if (effect.target === 'enemy' && !actorIsHero) {
+        // Enemy debuffing the hero ("enemy" from the enemy's POV = the player)
+        const next = {
+          ...state,
+          hero: {
+            ...state.hero,
+            statuses: addStatus(state.hero.statuses, effect.status, stacks),
+          },
+        };
+        return logEvent(next, 'apply_status', { target: 'hero', status: effect.status, stacks });
       } else if (effect.target === 'enemy' && targetId) {
         return applyToEnemy(state, targetId);
       }
