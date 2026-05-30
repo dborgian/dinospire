@@ -23,9 +23,11 @@ const DRY_RUN  = args.includes('--dry-run');
 const REGEN    = args.includes('--regen');
 const HERO     = args.includes('--hero') ? args[args.indexOf('--hero') + 1] : null;
 const ONLY_IDX = args.indexOf('--only');
-const ONLY     = ONLY_IDX >= 0 ? args[ONLY_IDX + 1].split(',') : null;
+const ONLY_VAL = ONLY_IDX >= 0 ? args[ONLY_IDX + 1] : undefined;
+const ONLY     = ONLY_VAL ? ONLY_VAL.split(',') : null;
 
 if (!HERO) { console.error('Usage: --hero <borea|rex|veloce>'); process.exit(1); }
+if (ONLY_IDX >= 0 && !ONLY_VAL) { console.error('Usage: --only <id1,id2,...>'); process.exit(1); }
 
 // ---------------------------------------------------------------------------
 // Card data types
