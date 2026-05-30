@@ -409,18 +409,19 @@ function HeroZone({ heroId, hp, maxHp, block, statuses, heroFlash, heroFloatNums
   const prefersReduced = useReducedMotion();
 
   const statusEntries = (Object.entries(statuses) as [StatusKey, number][]).filter(([, v]) => v > 0);
+  const hpPct = Math.max(0, (hp / maxHp) * 100);
 
   return (
-    <div className="relative flex flex-col items-center justify-end h-full pb-4 gap-2">
+    <div className="relative flex flex-col items-center justify-end h-full pb-3 gap-0 select-none">
       {/* Floating damage numbers */}
       <AnimatePresence>
         {heroFloatNums.map((n) => (
           <motion.span
             key={n.id}
             initial={{ y: 0, opacity: 1, scale: 1.3 }}
-            animate={prefersReduced ? { opacity: 0 } : { y: -60, opacity: 0, scale: 1 }}
+            animate={prefersReduced ? { opacity: 0 } : { y: -70, opacity: 0, scale: 1 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="absolute top-8 left-1/2 -translate-x-1/2 pointer-events-none text-2xl font-black text-red-400 select-none z-30"
+            className="absolute top-12 left-1/2 -translate-x-1/2 pointer-events-none text-3xl font-black text-red-400 z-30"
             style={{ textShadow: "0 0 14px #f87171" }}
             aria-hidden="true"
           >
@@ -432,33 +433,73 @@ function HeroZone({ heroId, hp, maxHp, block, statuses, heroFlash, heroFloatNums
       {/* Hero sprite */}
       <motion.div
         className="relative"
-        animate={heroFlash && !prefersReduced ? { opacity: [1, 0.2, 1] } : { opacity: 1 }}
+        animate={heroFlash && !prefersReduced ? { opacity: [1, 0.15, 1] } : { opacity: 1 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
       >
         {!spriteErr ? (
           <img
             src={`/art/heroes/${heroId}_cucciolo.png`}
             alt={`Eroe ${heroId}`}
-            className="h-44 w-auto object-contain drop-shadow-xl select-none"
+            className="h-56 w-auto object-contain drop-shadow-2xl"
             onError={() => setSpriteErr(true)}
             draggable={false}
           />
         ) : (
-          <span className="text-6xl select-none" aria-label={`Eroe ${heroId}`}>🦕</span>
+          <span className="text-8xl" aria-label={`Eroe ${heroId}`}>🦕</span>
         )}
 
-        {/* Block badge */}
+        {/* Block badge — top-right of sprite */}
         {block > 0 && (
-          <div
-            className="absolute -top-2 -right-2 flex items-center gap-0.5 bg-blue-900/90 border border-blue-400 text-blue-200 text-xs font-black px-1.5 py-0.5 rounded-full shadow"
+          <motion.div
+            key={block}
+            initial={{ scale: 1.4 }}
+            animate={{ scale: 1 }}
+            className="absolute -top-2 -right-2 flex items-center gap-0.5 bg-blue-900/95 border-2 border-blue-400 text-blue-100 text-sm font-black px-2 py-0.5 rounded-full shadow-lg"
             aria-label={`Blocco: ${block}`}
           >
-            <Shield className="w-3 h-3" aria-hidden="true" />
+            <Shield className="w-3.5 h-3.5" aria-hidden="true" />
             {block}
-          </div>
+          </motion.div>
         )}
       </motion.div>
 
+      {/* HP panel — below sprite */}
+      <div className="w-full px-3 mt-2 flex flex-col gap-1.5">
+        {/* HP numbers */}
+        <div className="flex items-center justify-between text-sm">
+          <span className="flex items-center gap-1 font-black text-red-400">
+            <span aria-hidden="true">❤</span>
+            <span className="tabular-nums">{hp}</span>
+          </span>
+          <span className="text-stone-500 text-xs font-semibold">/{maxHp}</span>
+        </div>
+
+        {/* HP bar */}
+        <div
+          className="w-full rounded-full overflow-hidden bg-black/60 border border-stone-700"
+          style={{ height: 10 }}
+          role="progressbar"
+          aria-valuenow={hp}
+          aria-valuemin={0}
+          aria-valuemax={maxHp}
+          aria-label={`Vita: ${hp} su ${maxHp}`}
+        >
+          <motion.div
+            className={`h-full rounded-full ${hpBarColor(hp, maxHp)}`}
+            animate={{ width: `${hpPct}%` }}
+            transition={{ duration: 0.3 }}
+          />
+        </div>
+
+        {/* Status chips */}
+        {statusEntries.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-0.5">
+            {statusEntries.map(([key, count]) => (
+              <HeroStatusChip key={key} status={key} stacks={count} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -813,55 +854,14 @@ export function CombatScreen({
         className="relative z-10 flex items-center justify-between px-4 bg-stone-950/80 backdrop-blur border-b border-stone-800/60 shrink-0"
         style={{ height: 54 }}
       >
-        {/* Left: HP bar + gold */}
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col gap-0.5" aria-label={`Vita: ${combat.hero.hp} su ${combat.hero.maxHp}`}>
-            <div className="flex items-center gap-1.5 text-sm flex-wrap">
-              <span className="text-red-400" aria-hidden="true">❤</span>
-              <span className="font-bold tabular-nums text-xs">
-                {combat.hero.hp}
-                <span className="text-stone-500 font-normal">/{combat.hero.maxHp}</span>
-              </span>
-              {/* Status icons inline with HP */}
-              {(Object.entries(combat.hero.statuses) as [StatusKey, number][])
-                .filter(([, v]) => v > 0)
-                .map(([key, count]) => {
-                  const m = HERO_STATUS_META[key];
-                  if (!m) return null;
-                  return (
-                    <span
-                      key={key}
-                      className={`flex items-center gap-0.5 text-xs font-bold px-1 py-0.5 rounded ${m.negative ? 'bg-red-950 text-red-300 border border-red-700' : 'bg-stone-700 text-stone-200'}`}
-                      title={m.label}
-                      aria-label={`${m.label}: ${count}`}
-                    >
-                      {m.icon}{count}
-                    </span>
-                  );
-                })}
-            </div>
-            <div
-              className="rounded-full overflow-hidden bg-stone-700"
-              style={{ width: 180, height: 14 }}
-              role="progressbar"
-              aria-valuenow={combat.hero.hp}
-              aria-valuemin={0}
-              aria-valuemax={combat.hero.maxHp}
-            >
-              <div
-                className={`h-full rounded-full transition-all duration-300 ${hpBarColor(combat.hero.hp, combat.hero.maxHp)}`}
-                style={{ width: `${Math.max(0, (combat.hero.hp / combat.hero.maxHp) * 100)}%` }}
-              />
-            </div>
-          </div>
-          <span
-            className="text-xs text-amber-400 font-bold flex items-center gap-1"
-            aria-label={`Oro: ${gold}`}
-          >
-            <span aria-hidden="true">💰</span>
-            {gold}
-          </span>
-        </div>
+        {/* Left: gold */}
+        <span
+          className="text-xs text-amber-400 font-bold flex items-center gap-1"
+          aria-label={`Oro: ${gold}`}
+        >
+          <span aria-hidden="true">💰</span>
+          {gold}
+        </span>
 
         {/* Center: floor label */}
         <span className="absolute left-1/2 -translate-x-1/2 text-sm text-stone-300 font-semibold tracking-wide">
