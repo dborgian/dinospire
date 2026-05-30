@@ -439,7 +439,7 @@ function HeroZone({ heroId, hp, maxHp, block, statuses, heroFlash, heroFloatNums
           <img
             src={`/art/heroes/${heroId}_cucciolo.png`}
             alt={`Eroe ${heroId}`}
-            className="h-32 w-auto object-contain drop-shadow-xl select-none"
+            className="h-44 w-auto object-contain drop-shadow-xl select-none"
             onError={() => setSpriteErr(true)}
             draggable={false}
           />
@@ -459,14 +459,6 @@ function HeroZone({ heroId, hp, maxHp, block, statuses, heroFlash, heroFloatNums
         )}
       </motion.div>
 
-      {/* Status effects — debuffs shown as labeled chips, buffs as small icons */}
-      {statusEntries.length > 0 && (
-        <div className="flex flex-wrap gap-1 justify-center max-w-[160px]">
-          {statusEntries.map(([key, count]) => (
-            <HeroStatusChip key={key} status={key} stacks={count} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -824,12 +816,29 @@ export function CombatScreen({
         {/* Left: HP bar + gold */}
         <div className="flex items-center gap-4">
           <div className="flex flex-col gap-0.5" aria-label={`Vita: ${combat.hero.hp} su ${combat.hero.maxHp}`}>
-            <div className="flex items-center gap-1.5 text-sm">
+            <div className="flex items-center gap-1.5 text-sm flex-wrap">
               <span className="text-red-400" aria-hidden="true">❤</span>
               <span className="font-bold tabular-nums text-xs">
                 {combat.hero.hp}
                 <span className="text-stone-500 font-normal">/{combat.hero.maxHp}</span>
               </span>
+              {/* Status icons inline with HP */}
+              {(Object.entries(combat.hero.statuses) as [StatusKey, number][])
+                .filter(([, v]) => v > 0)
+                .map(([key, count]) => {
+                  const m = HERO_STATUS_META[key];
+                  if (!m) return null;
+                  return (
+                    <span
+                      key={key}
+                      className={`flex items-center gap-0.5 text-xs font-bold px-1 py-0.5 rounded ${m.negative ? 'bg-red-950 text-red-300 border border-red-700' : 'bg-stone-700 text-stone-200'}`}
+                      title={m.label}
+                      aria-label={`${m.label}: ${count}`}
+                    >
+                      {m.icon}{count}
+                    </span>
+                  );
+                })}
             </div>
             <div
               className="rounded-full overflow-hidden bg-stone-700"
