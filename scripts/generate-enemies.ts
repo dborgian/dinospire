@@ -2,6 +2,7 @@
 // scripts/generate-enemies.ts
 // Generates pure illustration images for each enemy in enemies_act1.json.
 // No text, no UI elements — the game engine overlays stats and intent.
+// Aspect ratio: 3:4 (closest to 2:3 supported by Imagen API).
 //
 // Usage:
 //   GEMINI_API_KEY=<key> npx tsx scripts/generate-enemies.ts
@@ -87,7 +88,7 @@ function buildPrompt(id: string): string {
     : `The image contains no text, no labels, no numbers — pure illustration only.`;
 
   return [
-    `A dramatic full-bleed digital painting for a fantasy card game, portrait orientation (2:3 aspect ratio). Painterly Hearthstone-quality illustration style.`,
+    `A dramatic full-bleed digital painting for a fantasy card game, portrait orientation (3:4 aspect ratio). Painterly Hearthstone-quality illustration style.`,
 
     `Subject: ${dino}.`,
 
@@ -125,7 +126,7 @@ async function callImagen(prompt: string): Promise<Buffer | null> {
       instances: [{ prompt }],
       parameters: {
         sampleCount: 1,
-        aspectRatio: '2:3',
+        aspectRatio: '3:4',
         outputMimeType: 'image/png',
       },
     }),
