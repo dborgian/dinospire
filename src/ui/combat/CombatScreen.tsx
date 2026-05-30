@@ -228,15 +228,18 @@ function EnemyCard({ enemy, onClick, isPulsing, isShaking, isEnemyTurn }: EnemyC
         {/* Art fills entire card */}
         <EnemyArt definitionId={enemy.definitionId} name={enemy.definitionId} />
 
-        {/* Gradient overlay at bottom for text legibility */}
-        <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/90 to-transparent" />
+        {/* Gradient overlay at top for name legibility */}
+        <div className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-black/80 to-transparent" />
 
-        {/* Name */}
-        <div className="absolute bottom-10 inset-x-0 px-2 text-center">
+        {/* Name — top of card */}
+        <div className="absolute top-1.5 inset-x-0 px-2 text-center">
           <p className="text-white font-black text-sm uppercase tracking-wide truncate drop-shadow-lg">
             {enemy.definitionId.replace(/_/g, " ")}
           </p>
         </div>
+
+        {/* Gradient overlay at bottom for HP bar legibility */}
+        <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-black/90 to-transparent" />
 
         {/* HP bar over image */}
         <div className="absolute bottom-2 inset-x-2" role="progressbar"
