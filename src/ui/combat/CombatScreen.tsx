@@ -43,7 +43,7 @@ const ARENA_BACKGROUNDS = [
 ] as const;
 
 const FALLBACK_GRADIENT =
-  "radial-gradient(ellipse 80% 60% at 50% 20%, #1a2e1a 0%, #0d1f0d 40%, #0a0f0a 100%)";
+  "radial-gradient(ellipse 100% 70% at 50% 30%, #1f3d1a 0%, #122b10 35%, #0d1a0d 65%, #080f08 100%)";
 
 // Overlay darkens the background image so UI elements remain readable.
 const BACKGROUND_OVERLAY =
@@ -224,7 +224,7 @@ function EnemyCard({ enemy, onClick, isPulsing, isShaking, isEnemyTurn }: EnemyC
             : "shadow-2xl shadow-black/60",
           enemy.hp <= 0 ? "opacity-20 pointer-events-none" : "cursor-pointer",
         ].join(" ")}
-        style={{ width: "clamp(150px, 14vw, 210px)", aspectRatio: "2/3" }}
+        style={{ width: "clamp(180px, 20vw, 300px)", aspectRatio: "2/3" }}
       >
         {/* Art fills entire card */}
         <EnemyArt definitionId={enemy.definitionId} name={enemy.definitionId} />
@@ -233,8 +233,9 @@ function EnemyCard({ enemy, onClick, isPulsing, isShaking, isEnemyTurn }: EnemyC
         <div className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-black/80 to-transparent" />
 
         {/* Name — top of card */}
-        <div className="absolute top-1.5 inset-x-0 px-2 text-center">
-          <p className="text-white font-black text-sm uppercase tracking-wide truncate drop-shadow-lg">
+        <div className="absolute top-2 inset-x-0 px-3 text-center">
+          <p className="text-white font-black text-base uppercase tracking-wide truncate drop-shadow-lg"
+             style={{ textShadow: "0 2px 8px rgba(0,0,0,0.9)" }}>
             {enemy.definitionId.replace(/_/g, " ")}
           </p>
         </div>
@@ -615,7 +616,7 @@ export function CombatScreen({ onCombatEnd, onAbandon, floorLabel = "Atto 1 · P
 
       {/* ── Enemy area (top ~40%) ── */}
       <section
-        className="relative z-10 flex-1 flex items-end justify-center gap-8 px-6 pb-6 pt-2"
+        className="relative z-10 flex-1 flex items-center justify-center gap-12 px-6"
         aria-label="Area nemici"
       >
         {liveEnemies.map((enemy) => (
