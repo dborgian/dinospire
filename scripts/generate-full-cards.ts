@@ -1,12 +1,12 @@
 #!/usr/bin/env tsx
 // scripts/generate-full-cards.ts
-// Generates COMPLETE card images (frame + art + text + rarity) for a hero's deck.
-// The entire card is one PNG — no HTML overlay needed.
+// Generates COMPLETE card images (frame + art + text) for a hero's deck.
 //
 // Usage:
-//   GEMINI_API_KEY=<key> tsx scripts/generate-full-cards.ts --hero borea
-//   GEMINI_API_KEY=<key> tsx scripts/generate-full-cards.ts --hero borea --regen
-//   tsx scripts/generate-full-cards.ts --hero borea --dry-run
+//   GEMINI_API_KEY=<key> tsx scripts/generate-full-cards.ts --hero rex
+//   GEMINI_API_KEY=<key> tsx scripts/generate-full-cards.ts --hero rex --regen
+//   GEMINI_API_KEY=<key> tsx scripts/generate-full-cards.ts --hero rex --only morso_r,affondo_r
+//   tsx scripts/generate-full-cards.ts --hero rex --dry-run
 
 /// <reference path="./node-env.d.ts" />
 
@@ -16,17 +16,19 @@ import * as path from 'path';
 const API_KEY  = process.env.GEMINI_API_KEY;
 const MODEL    = 'imagen-4.0-fast-generate-001';
 const OUT_DIR  = path.join(process.cwd(), 'public', 'art', 'full-cards');
-const DELAY_MS = 7000;
+const DELAY_MS = 8000;
 
 const args     = process.argv.slice(2);
 const DRY_RUN  = args.includes('--dry-run');
 const REGEN    = args.includes('--regen');
 const HERO     = args.includes('--hero') ? args[args.indexOf('--hero') + 1] : null;
+const ONLY_IDX = args.indexOf('--only');
+const ONLY     = ONLY_IDX >= 0 ? args[ONLY_IDX + 1].split(',') : null;
 
 if (!HERO) { console.error('Usage: --hero <borea|rex|veloce>'); process.exit(1); }
 
 // ---------------------------------------------------------------------------
-// Card data types (mirror of game types, enough for prompt generation)
+// Card data types
 // ---------------------------------------------------------------------------
 
 interface CardEffect {
@@ -50,83 +52,156 @@ interface CardData {
 }
 
 // ---------------------------------------------------------------------------
-// Rarity → frame color description
+// Hero dinosaur descriptions
+// ---------------------------------------------------------------------------
+
+const HERO_DINO: Record<string, string> = {
+  rex: 'a juvenile Tyrannosaurus rex — massive skull with rows of serrated teeth, powerful muscular hindlegs, tiny forelimbs, dark charcoal scales with volcanic orange-red accents on the neck and spine, raw predatory power',
+  veloce: 'a young Deinonychus — sleek feathered dromeosaurid, razor-sharp retractable sickle claws on each foot, blue-grey plumage with iridescent teal feather tips, intelligent amber eyes, lightning-fast predator',
+  borea: 'a Borealopelta ankylosaur — heavy quadruped covered in stone-like osteoderms and bony armor plates, earth-brown and stone-grey coloring, massive tail club, living fortress',
+};
+
+// ---------------------------------------------------------------------------
+// Per-card illustration scenes
+// These override the generic effect-based scene for a more specific visual.
+// ---------------------------------------------------------------------------
+
+const CARD_SCENES: Record<string, string> = {
+  // Rex cards
+  morso_r:          'close-up of the dinosaur lunging forward with its enormous jaws wide open, rows of serrated teeth glistening, the enemy in its grip, ground cracking beneath its feet',
+  affondo_r:        'the dinosaur in full sprint lunging, low-angle shot from below looking up, the sheer weight and momentum of the charge, dust cloud and shattered rocks flying outward',
+  coda_spazzante_r: 'the dinosaur pivoting fast, its massive tail sweeping a wide arc through the air, shockwave radiating outward, multiple enemies knocked back',
+  ruggito_r:        'the dinosaur rearing back with jaws wide open, a thunderous roar erupting from its throat, visible sound waves rippling outward, the enemy shrinking back in fear',
+  predatore_alpha_r:'the dinosaur in a dramatic killing strike from above, total domination, the prey pinned beneath its foot, amber sky behind, the apex predator in its full terrifying glory',
+  istinto_caccia_r: 'the dinosaur low and stalking silently through tall ferns, eyes narrowed and focused, tracking unseen prey, tension and hunter instinct radiating from its posture',
+  morso_potenziato_r:'the dinosaur clamping down with its full jaw force, crushing a massive boulder in its bite to demonstrate raw power, stone fragments exploding outward',
+  carica_alpha_r:   'the dinosaur charging forward at full speed, head lowered, thunderous footsteps cracking the ground, dust trails behind, pure unstoppable momentum',
+  sentinella_apex_r:'the dinosaur standing tall and alert on high rocky ground, surveying its territory, a glowing amber energy barrier materializing around it, guardian of the land',
+  ruggito_sismico_r:'the dinosaur roaring so powerfully that the ground itself fractures and heaves, seismic cracks radiating out in all directions, the enemy off-balance',
+
+  // Veloce cards
+  beccata_v:           'the feathered dinosaur striking with its sharp beak in a quick precise jab, feathers ruffled from the speed, a single precise wound on the enemy',
+  doppio_artiglio_v:   'the dinosaur leaping with both sickle-clawed feet forward, a double slashing attack mid-air, teal feathers trailing in the motion',
+  scatto_v:            'the dinosaur in a blur of speed, leaving a motion trail behind, repositioning in an instant, enemy confused looking left as the attacker appears from the right',
+  branco_v:            'three silhouettes of the same feathered dinosaur surrounding an enemy, communicating in perfect pack coordination, glowing teal connecting lines between them',
+  sciame_compagni_v:   'a pack of small feathered raptors erupting from the undergrowth, swarming an overwhelmed enemy, feathers and claws everywhere',
+  coordinazione_branco_v:'two feathered raptors executing a perfectly timed pincer attack, one high one low, the enemy caught between them with no escape',
+  predazione_multipla_v:'the raptor striking three times in rapid succession, motion blur showing multiple strike positions, each hit leaving a glow trail',
+  fuga_tattica_v:      'the raptor leaping backwards off a wall with a flip, dodging an incoming strike at the last moment, teal feathers scattered in the evasion',
+  compagno_alpha_v:    'a large feathered raptor alpha arriving from above in a dive, golden aura surrounding it, joining its smaller companion in battle',
+  trappola_branco_v:   'the raptor setting a shimmering teal energy snare on the ground, the enemy walking into it, the pack closing in from all sides',
+
+  // Borea cards
+  carica_b:         'the armored ankylosaur charging forward like a boulder, its heavy armor plates absorbing anything in its path, the ground shaking with each step',
+  corazza_b:        'the ankylosaur curling defensively, a brilliant shield of golden energy erupting from its armor plates, the osteoderms glowing with protective power',
+  posizione_bassa_b:'the ankylosaur lowering its body to the ground, becoming an impenetrable living fortress, armor plates locking together, eyes glowing with resolve',
+  frantuma_ossa_b:  'the ankylosaur slamming its massive tail club sideways into the enemy, the impact shattering bone and sending shockwaves through the ground',
+  placca_ossea_b:   'the ankylosaur from the front, new bony plates visibly thickening and layering onto its armor in real time, growing stronger',
+  riflesso_corazza_b:'the ankylosaur deflecting an incoming attack with a bright flash off its armor, the hit bouncing back at the attacker',
+  contrattacco_b:   'the ankylosaur being struck and immediately countering with a devastating tail club swing, the defensive response becoming an attack',
+  fortezza_b:       'the ankylosaur surrounded by a towering stone fortress of energy, the ultimate impenetrable defensive stance, golden light emanating from every armor plate',
+  passo_pesante_b:  'the ankylosaur stepping forward slowly but with immense power, its heavy footstep fracturing the ground and sending tremors through the terrain',
+};
+
+// ---------------------------------------------------------------------------
+// Rarity frame descriptions
 // ---------------------------------------------------------------------------
 
 const RARITY_FRAME: Record<string, string> = {
-  starter:  'dark stone gray frame with muted amber filigree, simple border, no glow',
-  common:   'dark obsidian frame with warm amber border trim, subtle stone texture, clean design',
-  uncommon: 'deep navy blue frame with silver-blue filigree, soft cyan inner glow, dual-tone border',
-  rare:     'rich golden frame with ornate fossil-bone filigree, amber gems in corners, glowing golden aura, premium metallic sheen',
+  starter:  'dark stone-grey frame, simple warm amber border trim, no glow, clean and functional',
+  common:   'dark obsidian frame, warm amber border trim, subtle fossil-bone texture on the edges',
+  uncommon: 'deep navy blue frame, silver-blue filigree patterns, soft cyan inner glow along the border',
+  rare:     'rich golden frame, ornate fossil-bone filigree in corners, glowing amber gems inlaid, premium golden aura',
 };
 
 const TYPE_BANNER: Record<string, string> = {
-  attack: 'red-crimson "ATTACCO" type banner beneath the art, sword icon on left',
-  skill:  'sapphire-blue "ABILITÀ" type banner beneath the art, shield icon on left',
-  power:  'amber-gold "POTERE" type banner beneath the art, star icon on left',
-};
-
-const HERO_DESCRIPTIONS: Record<string, string> = {
-  borea: 'Borealopelta ankylosaur — quadrupedal living fortress, covered in heavy stone-like osteoderms and bony armor plates, earth-brown and stone-grey coloring, massive tail club',
-  rex:   'juvenile Tyrannosaurus rex — bipedal apex predator, massive skull with rows of serrated teeth, powerful hindlegs, tiny forelimbs, dark charcoal scales with volcanic red and orange accents, raw predatory power',
-  veloce: 'young Deinonychus — agile feathered dromeosaurid, razor-sharp retractable sickle claws on each foot, sleek build, blue-grey plumage with iridescent teal feather tips, lightning-fast pack hunter',
+  attack: 'crimson red banner labeled ATTACCO with a sword icon on the left',
+  skill:  'sapphire blue banner labeled ABILITÀ with a shield icon on the left',
+  power:  'amber gold banner labeled POTERE with a star/sparkle icon on the left',
 };
 
 // ---------------------------------------------------------------------------
-// Effect text builder (plain Italian, concise)
+// Effect text builder (Italian, concise and readable)
 // ---------------------------------------------------------------------------
+
+const STATUS_IT: Record<string, string> = {
+  strength:    'Forza',
+  weak:        'Debole',
+  vulnerable:  'Vulnerabile',
+  poison:      'Veleno',
+  vigor:       'Vigore',
+  thorns:      'Spine',
+  regen:       'Rigenerazione',
+  frail:       'Fragile',
+  burn:        'Bruciatura',
+};
+
+function statusName(key: string): string {
+  return STATUS_IT[key] ?? capitalize(key);
+}
 
 function effectText(effects: CardEffect[]): string {
   const parts: string[] = [];
   for (const e of effects) {
-    if (e.kind === 'damage' && typeof e.amount === 'number') parts.push(`Infliggi ${e.amount} danni`);
-    else if (e.kind === 'block' && typeof e.amount === 'number') parts.push(`Guadagna ${e.amount} blocco`);
-    else if (e.kind === 'draw' && e.n) parts.push(`Pesca ${e.n} carte`);
-    else if (e.kind === 'applyStatus') parts.push(`Applica ${e.stacks ?? 1} ${e.status}`);
-    else if (e.kind === 'exhaust') parts.push('Esaurisci');
-    else if (e.kind === 'gainEnergy') parts.push(`+${e.n} Energia`);
+    const allEnemies = e.target === 'all_enemies';
+    if (e.kind === 'damage' && typeof e.amount === 'number') {
+      parts.push(allEnemies ? `Infliggi ${e.amount} danni a tutti i nemici` : `Infliggi ${e.amount} danni`);
+    } else if (e.kind === 'block' && typeof e.amount === 'number') {
+      parts.push(`Guadagna ${e.amount} Blocco`);
+    } else if (e.kind === 'draw' && e.n) {
+      parts.push(`Pesca ${e.n} ${e.n === 1 ? 'carta' : 'carte'}`);
+    } else if (e.kind === 'applyStatus' && e.stacks && e.status) {
+      const target = e.target === 'self' ? 'a te stesso' : allEnemies ? 'a tutti i nemici' : 'al nemico';
+      parts.push(`Applica ${e.stacks} ${statusName(e.status)} ${target}`);
+    } else if (e.kind === 'exhaust') {
+      parts.push('Esaurisci');
+    } else if (e.kind === 'gainEnergy' && e.n) {
+      parts.push(`+${e.n} Energia`);
+    } else if (e.kind === 'heal' && typeof e.amount === 'number') {
+      parts.push(`Cura ${e.amount} HP`);
+    }
   }
-  return parts.join('. ') || 'Effetto speciale';
+  return parts.join('. ') + '.';
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 // ---------------------------------------------------------------------------
 // Full-card prompt builder
 // ---------------------------------------------------------------------------
 
-function buildFullCardPrompt(card: CardData, hero: string): string {
+function buildPrompt(card: CardData, hero: string): string {
   const frame    = RARITY_FRAME[card.rarity] ?? RARITY_FRAME.common;
   const typeBnr  = TYPE_BANNER[card.type] ?? TYPE_BANNER.skill;
   const cost     = card.cost === 'X' ? 'X' : String(card.cost);
-  const effDesc  = effectText(card.effects);
-  const flavor   = card.flavorIt ? `"${card.flavorIt.slice(0, 60)}"` : '';
-  const heroDesc = HERO_DESCRIPTIONS[hero] ?? HERO_DESCRIPTIONS.borea;
-
-  const primaryEff = card.effects[0]?.kind ?? 'skill';
-  const sceneMap: Record<string, string> = {
-    damage:      'powerful impact strike, shockwave, ground crack, debris flying',
-    block:       'crystalline shield barrier forming, glowing protective aura materializing',
-    applyStatus: 'swirling status effect aura — thorns as thorn vines, vulnerable as red fracture lines',
-    draw:        'glowing energy vortex, cards swirling in arcane light',
-    gainEnergy:  'amber lightning crackling, floating energy orbs',
-    exhaust:     'card dissolving into embers and ash',
-    heal:        'emerald healing light rising',
-  };
-  const scene = sceneMap[primaryEff] ?? 'tactical stance, focused energy';
+  const effText  = effectText(card.effects);
+  const flavor   = card.flavorIt ? card.flavorIt.slice(0, 80) : null;
+  const heroDesc = HERO_DINO[hero] ?? HERO_DINO.borea;
+  const scene    = CARD_SCENES[card.id] ?? 'the dinosaur in a powerful combat stance, dramatic action pose';
+  const cardName = card.name.it;
 
   return [
-    `A complete fantasy trading card game card for a dinosaur deckbuilder game.`,
-    `Card frame and border: ${frame}.`,
-    `Top-left corner: circular amber energy gem badge with the number "${cost}" in bold white — this is the mana/energy cost.`,
-    `Top-right corner: small rectangular rarity label "${card.rarity.toUpperCase()}" in matching frame color.`,
-    `Card name plate at top center: decorative banner with the bold text "${card.name.it}" in fantasy serif font.`,
-    `Central illustration (fills ~55% of card height): ${heroDesc}. Scene: ${scene}. Dramatic chiaroscuro lighting, painterly digital art, Hearthstone quality.`,
-    `Below illustration: ${typeBnr}.`,
-    `Effect text box: dark parchment texture background, legible fantasy font, text reads: "${effDesc}."`,
-    flavor ? `Flavor text in italics at bottom: ${flavor}.` : '',
-    `Overall card size: portrait 3:4 ratio (like a standard TCG card). Highly detailed, professional game card design.`,
-    `Art style: painterly digital illustration. Color palette: obsidian black, volcanic amber, warm gold, stone grey.`,
-    `Complete card — all elements visible and readable. NO watermarks. NO lorem ipsum.`,
-  ].filter(Boolean).join(' ');
+    `A professional fantasy trading card game card. Portrait orientation, 3:4 aspect ratio. Hearthstone-quality card design.`,
+
+    `CARD FRAME: ${frame}. The frame surrounds the entire card.`,
+
+    `TOP SECTION — three elements on one row:`,
+    `  Left: a circular amber gem badge containing the large bold number "${cost}" in white — this is the energy cost.`,
+    `  Center: a decorative stone nameplate banner with the card name "${cardName}" in large bold fantasy serif font (Cinzel style), clearly legible.`,
+    `  Right: a small rectangular badge showing "${card.rarity.toUpperCase()}" in matching frame color.`,
+
+    `CENTRAL ART (fills the middle 50% of the card height): ${heroDesc}. Scene: ${scene}. Dramatic chiaroscuro lighting, dark background, painterly digital art. The dinosaur is the clear focus.`,
+
+    `TYPE BANNER (below the art, full width): ${typeBnr}.`,
+
+    `EFFECT TEXT BOX (below type banner): dark parchment-brown background with subtle texture. Large readable fantasy font. Text: "${effText}"`,
+
+    flavor ? `FLAVOR TEXT (at the very bottom, italics, smaller than effect text): "${flavor}"` : '',
+
+    `STYLE RULES: painterly digital art, dark color palette (obsidian, volcanic amber, warm gold, stone grey). All text must be clearly legible — no blurry or garbled letters. No watermarks. No lorem ipsum. No placeholder text. The card layout is complete top-to-bottom.`,
+  ].filter(Boolean).join('\n\n');
 }
 
 // ---------------------------------------------------------------------------
@@ -168,60 +243,72 @@ async function callImagen(prompt: string): Promise<Buffer | null> {
 
 async function main() {
   if (!DRY_RUN && !API_KEY) {
-    console.error('❌  Set GEMINI_API_KEY env var (or use --dry-run)');
+    console.error('Set GEMINI_API_KEY env var (or use --dry-run)');
     process.exit(1);
   }
 
   if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
 
-  // Load cards for the chosen hero
   const cardFile = path.join(process.cwd(), 'src', 'data', 'cards', 'act1', `${HERO}.json`);
   if (!fs.existsSync(cardFile)) {
-    console.error(`❌  Card file not found: ${cardFile}`);
+    console.error(`Card file not found: ${cardFile}`);
     process.exit(1);
   }
 
-  const cards = JSON.parse(fs.readFileSync(cardFile, 'utf-8')) as CardData[];
-  console.log(`\n🎴  Generating ${cards.length} full cards for hero: ${HERO}\n`);
+  let cards = JSON.parse(fs.readFileSync(cardFile, 'utf-8')) as CardData[];
 
+  if (ONLY) {
+    cards = cards.filter((c) => ONLY.includes(c.id));
+    console.log(`\nFiltered to: ${cards.map((c) => c.id).join(', ')}`);
+  }
+
+  // Sort: starter → common → uncommon → rare (cheaper to generate simpler cards first)
+  const rarityOrder = { starter: 0, common: 1, uncommon: 2, rare: 3 };
+  cards.sort((a, b) => (rarityOrder[a.rarity] ?? 1) - (rarityOrder[b.rarity] ?? 1));
+
+  console.log(`\n  Generating ${cards.length} cards for hero: ${HERO}\n`);
   let generated = 0, skipped = 0, failed = 0;
 
   for (const card of cards) {
     const outPath = path.join(OUT_DIR, `${card.id}.png`);
 
     if (fs.existsSync(outPath) && !REGEN) {
-      console.log(`  ⏭  ${card.id} already exists — skip`);
+      console.log(`  SKIP  ${card.id} (already exists)`);
       skipped++;
       continue;
     }
 
-    const prompt = buildFullCardPrompt(card, HERO);
+    const prompt = buildPrompt(card, HERO!);
 
     if (DRY_RUN) {
-      console.log(`  [DRY] ${card.id}:\n    ${prompt.slice(0, 120)}…\n`);
+      console.log(`\n  [DRY] ${card.id} — ${card.name.it}\n${prompt.slice(0, 200)}…\n`);
       continue;
     }
 
-    process.stdout.write(`  Generating ${card.id} (${card.name.it})…`);
+    process.stdout.write(`  GEN   ${card.id} (${card.name.it})…`);
 
     try {
       const buf = await callImagen(prompt);
-      if (!buf) { console.log(' ⚠  no image returned'); failed++; }
-      else {
+      if (!buf) {
+        console.log('  WARNING: no image returned');
+        failed++;
+      } else {
         fs.writeFileSync(outPath, buf);
-        console.log(` ✅  Saved ${card.id}.png`);
+        console.log(` OK`);
         generated++;
       }
     } catch (err) {
-      console.log(` ❌  Error: ${(err as Error).message}`);
+      console.log(`  ERROR: ${(err as Error).message}`);
       failed++;
     }
 
-    if (generated + failed < cards.length) await new Promise((r) => setTimeout(r, DELAY_MS));
+    if (generated + failed < cards.length) {
+      await new Promise((r) => setTimeout(r, DELAY_MS));
+    }
   }
 
-  console.log(`\n✨  Done. Generated: ${generated}, Failed: ${failed}, Skipped: ${skipped}`);
-  console.log(`   Full cards saved to: ${OUT_DIR}\n`);
+  console.log(`\n  Done. Generated: ${generated}  Failed: ${failed}  Skipped: ${skipped}`);
+  console.log(`  Output: ${OUT_DIR}\n`);
 }
 
 main().catch(console.error);
