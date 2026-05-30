@@ -346,6 +346,64 @@ interface HeroZoneProps {
   heroFloatNums: { id: number; amount: number }[];
 }
 
+const HERO_STATUS_META: Partial<Record<StatusKey, { icon: string; label: string; negative: boolean }>> = {
+  weak:       { icon: "💢", label: "Debole",    negative: true  },
+  vulnerable: { icon: "🔻", label: "Vulnerabile", negative: true  },
+  frail:      { icon: "🫧", label: "Fragile",   negative: true  },
+  poison:     { icon: "☠",  label: "Veleno",    negative: true  },
+  burn:       { icon: "🔥", label: "Bruciatura", negative: true  },
+  bleed:      { icon: "🩸", label: "Sanguinamento", negative: true },
+  strength:   { icon: "⚔",  label: "Forza",     negative: false },
+  dexterity:  { icon: "🛡",  label: "Destrezza", negative: false },
+  vigor:      { icon: "⚡",  label: "Vigore",    negative: false },
+  thorns:     { icon: "🌵", label: "Spine",      negative: false },
+};
+
+function HeroStatusChip({ status, stacks }: { status: StatusKey; stacks: number }) {
+  const [showTip, setShowTip] = useState(false);
+  const meta = HERO_STATUS_META[status];
+  if (!meta) return null;
+
+  if (meta.negative) {
+    return (
+      <div className="relative">
+        <motion.div
+          initial={{ scale: 1.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-950 border border-red-500 text-red-300 text-xs font-bold cursor-default select-none"
+          onMouseEnter={() => setShowTip(true)}
+          onMouseLeave={() => setShowTip(false)}
+          aria-label={`${meta.label}: ${stacks}`}
+        >
+          <span className="text-sm leading-none">{meta.icon}</span>
+          <span>{meta.label}</span>
+          <span className="text-red-400 font-black">{stacks}</span>
+        </motion.div>
+        {showTip && (
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-50 pointer-events-none w-40 bg-stone-800 border border-stone-600 rounded-lg px-2 py-1.5 shadow-xl text-[10px] text-stone-300">
+            {status === "weak"       && "Le tue carte infliggono il 25% di danni in meno."}
+            {status === "vulnerable" && "Ricevi il 50% di danni in più dagli attacchi nemici."}
+            {status === "frail"      && "Guadagni il 25% di blocco in meno dalle carte."}
+            {status === "poison"     && `Perdi ${stacks} HP a fine turno, poi il veleno si riduce di 1.`}
+            {status === "burn"       && `Perdi ${stacks} HP a fine turno.`}
+            {status === "bleed"      && "Perdi 1 HP ogni volta che giochi una carta."}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="flex items-center gap-0.5 px-1 py-0.5 rounded bg-stone-700 border border-stone-500 text-stone-200 text-[10px] font-bold cursor-default select-none"
+      aria-label={`${meta.label}: ${stacks}`}
+    >
+      <span className="text-xs leading-none">{meta.icon}</span>
+      <span>{stacks}</span>
+    </div>
+  );
+}
+
 function HeroZone({ heroId, hp, maxHp, block, statuses, heroFlash, heroFloatNums }: HeroZoneProps) {
   const [spriteErr, setSpriteErr] = useState(false);
   const prefersReduced = useReducedMotion();
@@ -401,11 +459,11 @@ function HeroZone({ heroId, hp, maxHp, block, statuses, heroFlash, heroFloatNums
         )}
       </motion.div>
 
-      {/* Status effects row — icons 30×30px */}
+      {/* Status effects — debuffs shown as labeled chips, buffs as small icons */}
       {statusEntries.length > 0 && (
-        <div className="flex flex-wrap gap-1 justify-center">
+        <div className="flex flex-wrap gap-1 justify-center max-w-[160px]">
           {statusEntries.map(([key, count]) => (
-            <StatusBadge key={key} status={key} stacks={count} size="xs" />
+            <HeroStatusChip key={key} status={key} stacks={count} />
           ))}
         </div>
       )}
