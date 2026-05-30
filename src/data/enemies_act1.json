@@ -4,21 +4,28 @@
     "name": { "it": "Sciame di Compy" },
     "taxonGroup": "dromeosauride",
     "diet": "carnivoro",
-    "hp": 14,
+    "hp": 18,
     "tier": "normal",
     "art": { "phylopicUuid": "" },
     "movePattern": "sequential",
     "moves": [
       {
-        "id": "morsetto_branco",
-        "intent": { "type": "attack", "value": 4, "description": "Morsetti branco: 2+2" },
+        "id": "morsetti",
+        "intent": { "type": "attack", "value": 4, "description": "Morsetti: 2+2" },
         "effects": [
           { "kind": "repeat", "times": 2, "effect": { "kind": "damage", "amount": 2, "target": "enemy" } }
         ]
       },
       {
+        "id": "morso_frenetico",
+        "intent": { "type": "attack", "value": 6, "description": "Morso frenetico: 2+2+2" },
+        "effects": [
+          { "kind": "repeat", "times": 3, "effect": { "kind": "damage", "amount": 2, "target": "enemy" } }
+        ]
+      },
+      {
         "id": "morso_coordinato",
-        "intent": { "type": "attack", "value": 5, "description": "Morso coordinato: 5" },
+        "intent": { "type": "attack", "value": 5, "description": "Morso coordinato: 5 + 1 Debole" },
         "effects": [
           { "kind": "damage", "amount": 5, "target": "enemy" },
           { "kind": "applyStatus", "status": "weak", "stacks": 1, "target": "enemy" }
@@ -31,31 +38,32 @@
     "name": { "it": "Dilofosauro" },
     "taxonGroup": "theropode",
     "diet": "carnivoro",
-    "hp": 28,
+    "hp": 32,
     "tier": "normal",
     "art": { "phylopicUuid": "" },
     "movePattern": "sequential",
     "moves": [
       {
         "id": "sputo_velenoso",
-        "intent": { "type": "debuff", "value": 2, "description": "Sputa veleno: 2 dmg + 3 Veleno" },
+        "intent": { "type": "debuff", "value": 3, "description": "Sputa veleno: 3 dmg + 2 Veleno" },
         "effects": [
-          { "kind": "damage", "amount": 2, "target": "enemy" },
-          { "kind": "applyStatus", "status": "poison", "stacks": 3, "target": "enemy" }
-        ]
-      },
-      {
-        "id": "morso_potente",
-        "intent": { "type": "attack", "value": 8, "description": "Morde per 8" },
-        "effects": [
-          { "kind": "damage", "amount": 8, "target": "enemy" }
-        ]
-      },
-      {
-        "id": "sputo_rapido",
-        "intent": { "type": "debuff", "description": "Sputa: 2 Veleno" },
-        "effects": [
+          { "kind": "damage", "amount": 3, "target": "enemy" },
           { "kind": "applyStatus", "status": "poison", "stacks": 2, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "morso_acido",
+        "intent": { "type": "attack", "value": 9, "description": "Morso acido: 9 dmg + 1 Veleno" },
+        "effects": [
+          { "kind": "damage", "amount": 9, "target": "enemy" },
+          { "kind": "applyStatus", "status": "poison", "stacks": 1, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "sputo_concentrato",
+        "intent": { "type": "debuff", "description": "Sputa concentrato: 4 Veleno" },
+        "effects": [
+          { "kind": "applyStatus", "status": "poison", "stacks": 4, "target": "enemy" }
         ]
       }
     ]
@@ -65,30 +73,37 @@
     "name": { "it": "Pachicefalosauro" },
     "taxonGroup": "pachicefalosauro",
     "diet": "erbivoro",
-    "hp": 34,
+    "hp": 38,
     "tier": "normal",
     "art": { "phylopicUuid": "" },
     "movePattern": "sequential",
     "moves": [
       {
         "id": "preparazione",
-        "intent": { "type": "buff", "description": "Si prepara: +3 Forza" },
+        "intent": { "type": "buff", "description": "Si carica: +2 Forza (cumula!)" },
         "effects": [
-          { "kind": "applyStatus", "status": "strength", "stacks": 3, "target": "self" }
+          { "kind": "applyStatus", "status": "strength", "stacks": 2, "target": "self" }
         ]
       },
       {
         "id": "testata",
-        "intent": { "type": "attack", "value": 12, "description": "Testata potenziata: 12" },
+        "intent": { "type": "attack", "value": 12, "description": "Testata: 12 + Forza accumulata" },
         "effects": [
           { "kind": "damage", "amount": 12, "target": "enemy" }
         ]
       },
       {
-        "id": "testata_rapida",
-        "intent": { "type": "attack", "value": 7, "description": "Testata: 7" },
+        "id": "preparazione",
+        "intent": { "type": "buff", "description": "Si carica ancora: +2 Forza (cumula!)" },
         "effects": [
-          { "kind": "damage", "amount": 7, "target": "enemy" }
+          { "kind": "applyStatus", "status": "strength", "stacks": 2, "target": "self" }
+        ]
+      },
+      {
+        "id": "testata_rapida",
+        "intent": { "type": "attack", "value": 8, "description": "Testata rapida: 8 + Forza accumulata" },
+        "effects": [
+          { "kind": "damage", "amount": 8, "target": "enemy" }
         ]
       }
     ]
@@ -98,57 +113,75 @@
     "name": { "it": "Triceratopo Giovane" },
     "taxonGroup": "ceratopside",
     "diet": "erbivoro",
-    "hp": 42,
+    "hp": 38,
     "tier": "normal",
     "art": { "phylopicUuid": "" },
     "movePattern": "sequential",
     "moves": [
       {
-        "id": "difesa",
-        "intent": { "type": "defend", "value": 10, "description": "Si difende: +10 Block" },
+        "id": "postura_difensiva",
+        "intent": { "type": "defend", "value": 10, "description": "Postura: +10 Block + 1 Fragile su di te" },
         "effects": [
-          { "kind": "block", "amount": 10 }
+          { "kind": "block", "amount": 10 },
+          { "kind": "applyStatus", "status": "frail", "stacks": 1, "target": "enemy" }
         ]
       },
       {
-        "id": "carica",
-        "intent": { "type": "attack", "value": 12, "description": "Carica per 12" },
+        "id": "carica_cornuta",
+        "intent": { "type": "attack", "value": 14, "description": "Carica cornuta: 14 dmg" },
         "effects": [
-          { "kind": "damage", "amount": 12, "target": "enemy" }
+          { "kind": "damage", "amount": 14, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "calpesta",
+        "intent": { "type": "attack", "value": 8, "description": "Calpesta: 8 dmg + 1 Fragile" },
+        "effects": [
+          { "kind": "damage", "amount": 8, "target": "enemy" },
+          { "kind": "applyStatus", "status": "frail", "stacks": 1, "target": "enemy" }
         ]
       }
     ]
   },
   {
     "id": "utahraptor_coppia",
-    "name": { "it": "Utahraptor (coppia)" },
+    "name": { "it": "Coppia di Utahraptor" },
     "taxonGroup": "dromeosauride",
     "diet": "carnivoro",
-    "hp": 30,
+    "hp": 38,
     "tier": "elite",
     "art": { "phylopicUuid": "" },
     "movePattern": "sequential",
     "moves": [
       {
-        "id": "branco_combo",
-        "intent": { "type": "attack", "value": 9, "description": "Attacco di branco: 3+3+3" },
+        "id": "coordinazione",
+        "intent": { "type": "debuff", "description": "Coordinazione: 2 Debole su di te" },
         "effects": [
-          { "kind": "repeat", "times": 3, "effect": { "kind": "damage", "amount": 3, "target": "enemy" } }
+          { "kind": "applyStatus", "status": "weak", "stacks": 2, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "branco_combo",
+        "intent": { "type": "attack", "value": 12, "description": "Attacco coordinato: 4+4+4" },
+        "effects": [
+          { "kind": "repeat", "times": 3, "effect": { "kind": "damage", "amount": 4, "target": "enemy" } }
         ]
       },
       {
         "id": "mordi_fuggi",
-        "intent": { "type": "attack", "value": 11, "description": "Mordi e fuggi: 6 dmg + 5 Block" },
+        "intent": { "type": "attack", "value": 11, "description": "Mordi e fuggi: 8 dmg + 5 Block" },
         "effects": [
-          { "kind": "damage", "amount": 6, "target": "enemy" },
+          { "kind": "damage", "amount": 8, "target": "enemy" },
           { "kind": "block", "amount": 5 }
         ]
       },
       {
-        "id": "coordinazione",
-        "intent": { "type": "debuff", "description": "Coordinazione: 2 Debole" },
+        "id": "sfregio",
+        "intent": { "type": "debuff", "description": "Sfregio: 6 dmg + 1 Fragile + 1 Debole" },
         "effects": [
-          { "kind": "applyStatus", "status": "weak", "stacks": 2, "target": "enemy" }
+          { "kind": "damage", "amount": 6, "target": "enemy" },
+          { "kind": "applyStatus", "status": "frail", "stacks": 1, "target": "enemy" },
+          { "kind": "applyStatus", "status": "weak", "stacks": 1, "target": "enemy" }
         ]
       }
     ]
@@ -158,7 +191,7 @@
     "name": { "it": "Carnotaurus — Predatore Furtivo" },
     "taxonGroup": "theropode",
     "diet": "carnivoro",
-    "hp": 95,
+    "hp": 100,
     "tier": "boss",
     "art": { "phylopicUuid": "" },
     "movePattern": "sequential",
@@ -184,6 +217,14 @@
         "effects": [
           { "kind": "applyStatus", "status": "weak", "stacks": 2, "target": "enemy" },
           { "kind": "applyStatus", "status": "vulnerable", "stacks": 2, "target": "enemy" }
+        ]
+      },
+      {
+        "id": "balzo_letale",
+        "intent": { "type": "attack", "value": 20, "description": "Balzo letale: 20 dmg + 1 Fragile" },
+        "effects": [
+          { "kind": "damage", "amount": 20, "target": "enemy" },
+          { "kind": "applyStatus", "status": "frail", "stacks": 1, "target": "enemy" }
         ]
       }
     ]
