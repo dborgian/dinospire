@@ -24,6 +24,7 @@ type WrapperState = 'loading' | 'ready' | 'error';
 export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
   const run = useRunStore((s) => s.run);
   const runDispatch = useRunStore((s) => s.dispatch);
+  const clearRun = useRunStore((s) => s.clearRun);
   const { initCombat, clearCombat } = useCombatStore();
   const getCombat = useCombatStore((s) => s.combat);
 
@@ -222,9 +223,15 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
     ? `Atto ${run?.act ?? 1} · Piano ${currentNode.floor + 1}`
     : `Atto ${run?.act ?? 1}`;
 
+  function handleAbandon() {
+    clearCombat();
+    clearRun();
+  }
+
   return (
     <CombatScreen
       onCombatEnd={(result) => result === 'victory' ? handleVictory() : handleDefeat()}
+      onAbandon={handleAbandon}
       floorLabel={floorLabel}
       gold={run?.gold ?? 0}
     />

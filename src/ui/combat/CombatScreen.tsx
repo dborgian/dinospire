@@ -55,6 +55,7 @@ const BACKGROUND_OVERLAY =
 
 export interface CombatScreenProps {
   onCombatEnd: (result: "victory" | "defeat") => void;
+  onAbandon?: () => void;
   /** Act floor label e.g. "Atto 1 · Piano 3" */
   floorLabel?: string;
   gold?: number;
@@ -223,7 +224,7 @@ function EnemyCard({ enemy, onClick, isPulsing, isShaking, isEnemyTurn }: EnemyC
             : "shadow-2xl shadow-black/60",
           enemy.hp <= 0 ? "opacity-20 pointer-events-none" : "cursor-pointer",
         ].join(" ")}
-        style={{ width: "clamp(140px, 18vw, 220px)", aspectRatio: "3/4" }}
+        style={{ width: "clamp(150px, 14vw, 210px)", aspectRatio: "2/3" }}
       >
         {/* Art fills entire card */}
         <EnemyArt definitionId={enemy.definitionId} name={enemy.definitionId} />
@@ -334,7 +335,7 @@ function PilePreview({ title, iids, cardDefs, onClose }: PilePreviewProps) {
 // CombatScreen
 // ---------------------------------------------------------------------------
 
-export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", gold = 0 }: CombatScreenProps) {
+export function CombatScreen({ onCombatEnd, onAbandon, floorLabel = "Atto 1 · Piano 1", gold = 0 }: CombatScreenProps) {
   const combat = useCombatStore((s) => s.combat);
   const dispatch = useCombatStore((s) => s.dispatch);
   const playCard = useCombatStore((s) => s.playCard);
@@ -579,13 +580,18 @@ export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", go
         <span className="text-xs text-stone-400 font-semibold tracking-wide">{floorLabel}</span>
         <div className="flex items-center gap-3">
           <span className="text-xs text-amber-400 font-bold" aria-label={`Oro: ${gold}`}>💰 {gold}</span>
-          <button
-            type="button"
-            className="text-stone-400 hover:text-stone-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded p-1"
-            aria-label="Impostazioni"
-          >
-            ⚙
-          </button>
+          {onAbandon && (
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm("Abbandonare la run in corso?")) onAbandon();
+              }}
+              className="text-stone-500 hover:text-red-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded p-1 text-sm font-bold"
+              aria-label="Abbandona la run"
+            >
+              ✕ Esci
+            </button>
+          )}
         </div>
       </header>
 

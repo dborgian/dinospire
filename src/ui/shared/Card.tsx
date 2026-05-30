@@ -59,9 +59,9 @@ const TAG_LABEL: Record<CardTag, string> = {
 // Effect text renderer
 // ---------------------------------------------------------------------------
 
-function effectSummary(def: Card): string {
+function effectSummary(def: Card, isUpgraded: boolean): string {
   const parts: string[] = [];
-  const effects = def.upgraded ? def.upgraded.effects : def.effects;
+  const effects = isUpgraded && def.upgraded ? def.upgraded.effects : def.effects;
 
   for (const eff of effects) {
     if (eff.kind === "damage") {
@@ -150,13 +150,14 @@ function FullCard({
       {...hoverAnim}
       {...transitionProp}
       className={[
-        "relative w-[8.75rem] h-[13.125rem] rounded-xl overflow-hidden select-none",
+        "relative rounded-xl overflow-hidden select-none",
         selectedStyle,
         selectedYOffset,
         playableStyle,
         exhaustStyle,
         "transition-all duration-150",
       ].filter(Boolean).join(" ")}
+      style={{ width: "clamp(100px, 7.5vw, 140px)", aspectRatio: "2/3" }}
       onClick={onClick}
       role="button"
       tabIndex={isExhausted ? -1 : 0}
@@ -185,9 +186,14 @@ function FullCard({
 
       {/* Upgraded indicator */}
       {instance.upgraded && (
-        <div className="absolute top-1.5 right-1.5 z-10 w-5 h-5 rounded-full bg-amber-400 text-stone-950 text-xs font-black flex items-center justify-center shadow">
-          +
-        </div>
+        <>
+          {/* Amber glow border on the card */}
+          <div className="absolute inset-0 rounded-xl pointer-events-none ring-2 ring-amber-400 shadow-[0_0_18px_rgba(251,191,36,0.6)]" />
+          {/* POTENZIATA banner */}
+          <div className="absolute bottom-0 inset-x-0 z-10 bg-amber-400/90 text-stone-950 text-[8px] font-black text-center tracking-widest py-0.5 uppercase">
+            ✦ Potenziata ✦
+          </div>
+        </>
       )}
 
       {/* Unplayable dark tint (energy too low) — layered above image */}
@@ -232,6 +238,7 @@ function HtmlCard({
 
   const rarity = RARITY_STYLES[definition.rarity];
   const typeStyle = TYPE_STYLES[definition.type];
+  const isUpgraded = instance.upgraded;
 
   const localArtUrl = `/art/cards/${definition.id}.png`;
   const phylopicUuid = definition.art?.phylopicUuid;
@@ -247,15 +254,16 @@ function HtmlCard({
       {...hoverAnim}
       {...transitionProp}
       className={[
-        "relative flex flex-col w-[8.75rem] h-[13.125rem] rounded-xl border-2 overflow-hidden select-none",
+        "relative flex flex-col rounded-xl border-2 overflow-hidden select-none",
         "bg-stone-900",
-        rarity.border,
+        isUpgraded ? "border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.5)]" : rarity.border,
         selectedStyle,
         selectedYOffset,
         playableStyle,
         exhaustStyle,
         "transition-all duration-150",
       ].filter(Boolean).join(" ")}
+      style={{ width: "clamp(100px, 7.5vw, 140px)", aspectRatio: "2/3" }}
       onClick={onClick}
       role="button"
       tabIndex={isExhausted ? -1 : 0}
@@ -274,7 +282,7 @@ function HtmlCard({
 
       {/* Art area */}
       <div className="mx-1.5 rounded-lg bg-stone-800 flex items-center justify-center overflow-hidden"
-           style={{ height: "5.5rem" }}>
+           style={{ height: "42%" }}>
         {silhouetteUrl ? (
           <img
             src={silhouetteUrl}
@@ -298,7 +306,7 @@ function HtmlCard({
         <p className="text-[11px] font-black text-stone-100 leading-tight line-clamp-1 tracking-wide"
            style={{ fontFamily: "'Cinzel', 'Georgia', serif" }}>
           {definition.name.it}
-          {instance.upgraded && <span className="text-amber-400">+</span>}
+          {isUpgraded && <span className="text-amber-400 ml-0.5">+</span>}
         </p>
       </div>
 
@@ -312,18 +320,25 @@ function HtmlCard({
       {/* Effect text */}
       <div className="px-2 flex-1 overflow-hidden">
         <p className="text-[10px] text-stone-300 leading-snug line-clamp-3">
-          {effectSummary(definition)}
+          {effectSummary(definition, isUpgraded)}
         </p>
       </div>
 
-      {/* Tags */}
-      {definition.tags.length > 0 && (
+      {/* Tags — hidden when upgraded to make room for banner */}
+      {definition.tags.length > 0 && !isUpgraded && (
         <div className="px-1.5 pb-1.5 flex flex-wrap gap-0.5 shrink-0">
           {definition.tags.slice(0, 2).map((tag) => (
             <span key={tag} className="text-[9px] bg-stone-800 text-stone-400 rounded px-1 py-0.5 leading-none">
               {TAG_LABEL[tag]}
             </span>
           ))}
+        </div>
+      )}
+
+      {/* Upgrade banner */}
+      {isUpgraded && (
+        <div className="bg-amber-400 text-stone-950 text-[8px] font-black text-center tracking-widest py-0.5 uppercase shrink-0">
+          ✦ Potenziata ✦
         </div>
       )}
     </motion.article>
