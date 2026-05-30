@@ -66,12 +66,14 @@ export const useCombatStore = create<CombatStore>()(
           const def = contentRegistry.cards.get(instance.cardId);
           if (!def) return;
 
-          const resolvedCost =
-            instance.costOverride !== undefined
-              ? instance.costOverride
-              : typeof def.cost === "number"
-                ? def.cost
-                : 0;
+          // Use upgraded version when applicable
+          const upgradedDef = instance.upgraded ? def.upgraded : undefined;
+          const activeEffects = (upgradedDef?.effects ?? def.effects) as CardEffect[];
+          const baseCost =
+            upgradedDef?.cost !== undefined
+              ? upgradedDef.cost
+              : typeof def.cost === "number" ? def.cost : 0;
+          const resolvedCost = instance.costOverride !== undefined ? instance.costOverride : baseCost;
 
           if (!canPlayCard(combat, cardIid, resolvedCost)) return;
 
@@ -82,10 +84,10 @@ export const useCombatStore = create<CombatStore>()(
             cardsPlayedThisTurn: combat.cardsPlayedThisTurn + 1,
           };
 
-          // 2. Resolve all card effects
+          // 2. Resolve all card effects (upgraded if applicable)
           s = applyEffects(
             s,
-            def.effects as CardEffect[],
+            activeEffects,
             true,
             targetId,
             { sourceCardIid: cardIid },
