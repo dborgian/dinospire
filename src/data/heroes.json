@@ -117,9 +117,14 @@
       }
     },
     "starterDeck": [
-      "carica_b", "carica_b", "carica_b", "carica_b", "carica_b",
-      "corazza_b", "corazza_b", "corazza_b",
-      "posizione_bassa_b", "posizione_bassa_b"
+      "carica_b", "carica_b",
+      "colpo_pesante_b",
+      "passo_pesante_b",
+      "corazza_b", "corazza_b",
+      "posizione_bassa_b",
+      "scaglia_libera_b",
+      "istinto_difensivo_b",
+      "vulnerabilita_esposta_b"
     ],
     "starterRelic": "scaglia_madre",
     "primeConditions": [

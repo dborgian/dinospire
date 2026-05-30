@@ -9,15 +9,44 @@
     "act": 1,
     "tags": ["erbivoro", "ankylosauro"],
     "effects": [
-      { "kind": "damage", "amount": 4, "target": "enemy" },
+      { "kind": "damage", "amount": 5, "target": "enemy" },
       { "kind": "block", "amount": 4 }
     ],
     "upgraded": {
       "effects": [
-        { "kind": "damage", "amount": 6, "target": "enemy" },
+        { "kind": "damage", "amount": 7, "target": "enemy" },
         { "kind": "block", "amount": 6 }
       ]
-    }
+    },
+    "flavorIt": "Attacco e difesa in un solo gesto."
+  },
+  {
+    "id": "colpo_pesante_b",
+    "name": { "it": "Colpo Pesante" },
+    "hero": "borea",
+    "cost": 2,
+    "type": "attack",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["erbivoro", "ankylosauro"],
+    "effects": [{ "kind": "damage", "amount": 14, "target": "enemy" }],
+    "upgraded": {
+      "effects": [{ "kind": "damage", "amount": 18, "target": "enemy" }]
+    },
+    "flavorIt": "La clava caudale pesa quanto una roccia."
+  },
+  {
+    "id": "passo_pesante_b",
+    "name": { "it": "Passo Pesante" },
+    "hero": "borea",
+    "cost": 0,
+    "type": "attack",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["erbivoro", "ankylosauro"],
+    "effects": [{ "kind": "damage", "amount": 3, "target": "all_enemies" }],
+    "upgraded": { "effects": [{ "kind": "damage", "amount": 5, "target": "all_enemies" }] },
+    "flavorIt": "Ogni passo fa tremare la terra."
   },
   {
     "id": "corazza_b",
@@ -41,15 +70,65 @@
     "act": 1,
     "tags": ["ankylosauro"],
     "effects": [
-      { "kind": "block", "amount": 5 },
-      { "kind": "applyStatus", "status": "dodge", "stacks": 1, "target": "self" }
+      { "kind": "block", "amount": 12 },
+      { "kind": "exhaust", "target": "self" }
     ],
     "upgraded": {
       "effects": [
-        { "kind": "block", "amount": 7 },
-        { "kind": "applyStatus", "status": "dodge", "stacks": 2, "target": "self" }
+        { "kind": "block", "amount": 16 },
+        { "kind": "exhaust", "target": "self" }
       ]
-    }
+    },
+    "flavorIt": "Il corpo che tocca terra è un muro impossibile."
+  },
+  {
+    "id": "scaglia_libera_b",
+    "name": { "it": "Scaglia Libera" },
+    "hero": "borea",
+    "cost": 0,
+    "type": "skill",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["ankylosauro"],
+    "effects": [{ "kind": "block", "amount": 3 }],
+    "upgraded": { "effects": [{ "kind": "block", "amount": 5 }] }
+  },
+  {
+    "id": "istinto_difensivo_b",
+    "name": { "it": "Istinto Difensivo" },
+    "hero": "borea",
+    "cost": 1,
+    "type": "skill",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["erbivoro", "ankylosauro"],
+    "effects": [{ "kind": "draw", "n": 2 }],
+    "upgraded": {
+      "effects": [
+        { "kind": "draw", "n": 2 },
+        { "kind": "block", "amount": 3 }
+      ]
+    },
+    "flavorIt": "La corazza spessa non rallenta la mente."
+  },
+  {
+    "id": "vulnerabilita_esposta_b",
+    "name": { "it": "Vulnerabilità Esposta" },
+    "hero": "borea",
+    "cost": 1,
+    "type": "skill",
+    "rarity": "starter",
+    "act": 1,
+    "tags": ["ankylosauro"],
+    "effects": [
+      { "kind": "applyStatus", "status": "vulnerable", "stacks": 2, "target": "enemy" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "applyStatus", "status": "vulnerable", "stacks": 3, "target": "enemy" }
+      ]
+    },
+    "flavorIt": "Anche le creature più coriacee hanno un punto debole."
   },
   {
     "id": "frantuma_ossa_b",
@@ -73,6 +152,26 @@
     "flavorIt": "La clava caudale di Borea non lascia scampo."
   },
   {
+    "id": "riflesso_corazza_b",
+    "name": { "it": "Riflesso Corazza" },
+    "hero": "borea",
+    "cost": 1,
+    "type": "skill",
+    "rarity": "common",
+    "act": 1,
+    "tags": ["ankylosauro"],
+    "effects": [
+      { "kind": "block", "amount": 5 },
+      { "kind": "applyStatus", "status": "thorns", "stacks": 3, "target": "self" }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "block", "amount": 7 },
+        { "kind": "applyStatus", "status": "thorns", "stacks": 5, "target": "self" }
+      ]
+    }
+  },
+  {
     "id": "placca_ossea_b",
     "name": { "it": "Placca Ossea" },
     "hero": "borea",
@@ -94,26 +193,6 @@
     "flavorIt": "Uno scudo improvvisato dagli strati di osso dermal."
   },
   {
-    "id": "riflesso_corazza_b",
-    "name": { "it": "Riflesso Corazza" },
-    "hero": "borea",
-    "cost": 1,
-    "type": "skill",
-    "rarity": "common",
-    "act": 1,
-    "tags": ["ankylosauro"],
-    "effects": [
-      { "kind": "block", "amount": 5 },
-      { "kind": "applyStatus", "status": "thorns", "stacks": 3, "target": "self" }
-    ],
-    "upgraded": {
-      "effects": [
-        { "kind": "block", "amount": 7 },
-        { "kind": "applyStatus", "status": "thorns", "stacks": 5, "target": "self" }
-      ]
-    }
-  },
-  {
     "id": "contrattacco_b",
     "name": { "it": "Contrattacco" },
     "hero": "borea",
@@ -123,21 +202,13 @@
     "act": 1,
     "tags": ["erbivoro", "ankylosauro"],
     "effects": [
-      {
-        "kind": "conditional",
-        "if": { "op": "gte", "a": { "op": "stat", "stat": "dexterity" }, "b": { "op": "val", "v": 5 } },
-        "then": [{ "kind": "damage", "amount": 9, "target": "enemy" }],
-        "else": [{ "kind": "damage", "amount": 6, "target": "enemy" }]
-      }
+      { "kind": "damage", "amount": 6, "target": "enemy" },
+      { "kind": "block", "amount": 4 }
     ],
     "upgraded": {
       "effects": [
-        {
-          "kind": "conditional",
-          "if": { "op": "gte", "a": { "op": "stat", "stat": "dexterity" }, "b": { "op": "val", "v": 5 } },
-          "then": [{ "kind": "damage", "amount": 13, "target": "enemy" }],
-          "else": [{ "kind": "damage", "amount": 9, "target": "enemy" }]
-        }
+        { "kind": "damage", "amount": 9, "target": "enemy" },
+        { "kind": "block", "amount": 6 }
       ]
     },
     "flavorIt": "La difesa migliore è saper cogliere il momento."
@@ -154,18 +225,5 @@
     "effects": [{ "kind": "applyStatus", "status": "thorns", "stacks": 2, "target": "self" }],
     "upgraded": { "effects": [{ "kind": "applyStatus", "status": "thorns", "stacks": 4, "target": "self" }] },
     "flavorIt": "Borea diventa un muro invalicabile. Il block non cede. Il nemico sì."
-  },
-  {
-    "id": "passo_pesante_b",
-    "name": { "it": "Passo Pesante" },
-    "hero": "borea",
-    "cost": 0,
-    "type": "attack",
-    "rarity": "common",
-    "act": 1,
-    "tags": ["erbivoro", "ankylosauro"],
-    "effects": [{ "kind": "damage", "amount": 3, "target": "all_enemies" }],
-    "upgraded": { "effects": [{ "kind": "damage", "amount": 5, "target": "all_enemies" }] },
-    "flavorIt": "Ogni passo di Borea fa tremare la terra."
   }
 ]

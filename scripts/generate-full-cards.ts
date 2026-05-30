@@ -91,16 +91,21 @@ const CARD_SCENES: Record<string, string> = {
   compagno_alpha_v:    'a large feathered raptor alpha arriving from above in a dive, golden aura surrounding it, joining its smaller companion in battle',
   trappola_branco_v:   'the raptor setting a shimmering teal energy snare on the ground, the enemy walking into it, the pack closing in from all sides',
 
-  // Borea cards
-  carica_b:         'the armored ankylosaur charging forward like a boulder, its heavy armor plates absorbing anything in its path, the ground shaking with each step',
-  corazza_b:        'the ankylosaur curling defensively, a brilliant shield of golden energy erupting from its armor plates, the osteoderms glowing with protective power',
-  posizione_bassa_b:'the ankylosaur lowering its body to the ground, becoming an impenetrable living fortress, armor plates locking together, eyes glowing with resolve',
-  frantuma_ossa_b:  'the ankylosaur slamming its massive tail club sideways into the enemy, the impact shattering bone and sending shockwaves through the ground',
-  placca_ossea_b:   'the ankylosaur from the front, new bony plates visibly thickening and layering onto its armor in real time, growing stronger',
-  riflesso_corazza_b:'the ankylosaur deflecting an incoming attack with a bright flash off its armor, the hit bouncing back at the attacker',
-  contrattacco_b:   'the ankylosaur being struck and immediately countering with a devastating tail club swing, the defensive response becoming an attack',
-  fortezza_b:       'the ankylosaur surrounded by a towering stone fortress of energy, the ultimate impenetrable defensive stance, golden light emanating from every armor plate',
-  passo_pesante_b:  'the ankylosaur stepping forward slowly but with immense power, its heavy footstep fracturing the ground and sending tremors through the terrain',
+  // Borea cards — starter
+  carica_b:              'the armored ankylosaur charging forward like a living battering ram, its thick osteoderms absorbing impact while its shoulder slams into the enemy, dust explosion on contact, simultaneous attack and shield',
+  colpo_pesante_b:       'the ankylosaur rearing back and swinging its massive bone-studded tail club in a devastating arc, the enemy hit square-on and sent flying, the ground cracking from the shockwave',
+  passo_pesante_b:       'the ankylosaur taking one slow deliberate step forward, its enormous weight causing the earth to fracture in radiating cracks, all surrounding enemies staggered by the tremor',
+  corazza_b:             'the ankylosaur still and upright, its entire surface of osteoderms suddenly illuminating with warm amber energy, a layered living shield forming over every bony plate, fortress mode activated',
+  posizione_bassa_b:     'the ankylosaur pressing its entire body flat against the ground, legs splayed wide, becoming an immovable stone slab, armor fusing with the earth beneath, pure unyielding block',
+  scaglia_libera_b:      'a single large osteoderm plate detaching from the ankylosaur and floating in front of it as a quick improvised shield, deflecting a strike at the last second',
+  istinto_difensivo_b:   'the ankylosaur closing its eyes in a brief moment of calm focus, its prehistoric survival instincts sharpening, tactical clarity visible in the glow of its eyes reopening',
+  vulnerabilita_esposta_b:'the ankylosaur using its tail to knock the enemy off balance, exposing a gap in the enemy\'s armor, cracks visibly spreading along the enemy\'s shell or hide, ready to be exploited',
+  // Borea cards — pool
+  frantuma_ossa_b:       'the ankylosaur slamming its massive tail club sideways into the enemy, the impact shattering bone and sending shockwaves through the ground, the enemy left cracked and vulnerable',
+  placca_ossea_b:        'close-up of the ankylosaur\'s side, new bony dermal plates visibly thickening and layering over existing armor in real time, growing stronger with each passing moment',
+  riflesso_corazza_b:    'the ankylosaur deflecting an incoming strike with a brilliant flash off its armor, the reflected force sending the attacker reeling back from their own blow',
+  contrattacco_b:        'the ankylosaur absorbing a hit without flinching, then immediately retaliating with a precise tail club swing, the counter-hit more powerful than the original strike',
+  fortezza_b:            'the ankylosaur surrounded by an aura of thorned stone walls erupting from the ground around it, every spine and plate sharp and ready, a permanent living fortress',
 };
 
 // ---------------------------------------------------------------------------
