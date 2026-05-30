@@ -2,8 +2,8 @@
 // Layout: header → enemy row → hero stats bar → hand area.
 // Tap-to-select pattern: tap card → highlight, tap enemy → play card.
 
-import { useEffect, useRef, useCallback, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useCallback, useState, useMemo } from "react";
+import { AnimatePresence, motion, useReducedMotion, type Variants } from "framer-motion";
 import {
   Sword, Shield, Sparkles, Skull, HelpCircle,
 } from "lucide-react";
@@ -27,6 +27,27 @@ import type {
   IntentType,
   StatusKey,
 } from "@/game/types";
+
+// ---------------------------------------------------------------------------
+// Arena background paths — populated by `npm run generate:backgrounds`
+// Falls back gracefully to the gradient if images are missing.
+// ---------------------------------------------------------------------------
+
+const ARENA_BACKGROUNDS = [
+  "/art/backgrounds/arena_forest.png",
+  "/art/backgrounds/arena_volcano.png",
+  "/art/backgrounds/arena_swamp.png",
+  "/art/backgrounds/arena_savanna.png",
+  "/art/backgrounds/arena_cave.png",
+  "/art/backgrounds/arena_coast.png",
+] as const;
+
+const FALLBACK_GRADIENT =
+  "radial-gradient(ellipse 80% 60% at 50% 20%, #1a2e1a 0%, #0d1f0d 40%, #0a0f0a 100%)";
+
+// Overlay darkens the background image so UI elements remain readable.
+const BACKGROUND_OVERLAY =
+  "linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.65))";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -73,19 +94,29 @@ function DamageNumber({ amount, isBlock = false, id }: DamageNumberProps) {
 }
 
 // ---------------------------------------------------------------------------
-// Intent icon
+// Intent icon — two size variants
 // ---------------------------------------------------------------------------
 
-function IntentIcon({ type }: { type: IntentType }) {
-  const cls = "w-4 h-4";
+function IntentIcon({ type, size = "sm" }: { type: IntentType; size?: "sm" | "lg" }) {
+  const cls = size === "lg" ? "w-5 h-5" : "w-4 h-4";
   switch (type) {
-    case "attack":  return <Sword  className={`${cls} text-red-400`}   aria-hidden="true" />;
-    case "defend":  return <Shield className={`${cls} text-blue-400`}  aria-hidden="true" />;
-    case "buff":    return <Sparkles className={`${cls} text-amber-400`} aria-hidden="true" />;
-    case "debuff":  return <Skull  className={`${cls} text-purple-400`} aria-hidden="true" />;
-    case "unknown": return <HelpCircle className={`${cls} text-stone-400`} aria-hidden="true" />;
+    case "attack":  return <Sword  className={`${cls} text-red-300`}    aria-hidden="true" />;
+    case "defend":  return <Shield className={`${cls} text-blue-300`}   aria-hidden="true" />;
+    case "buff":    return <Sparkles className={`${cls} text-amber-300`} aria-hidden="true" />;
+    case "debuff":  return <Skull  className={`${cls} text-purple-300`} aria-hidden="true" />;
+    case "unknown": return <HelpCircle className={`${cls} text-stone-300`} aria-hidden="true" />;
   }
 }
+
+// Framer Motion variants for intent pulse (enemy turn)
+const intentPulseVariants: Variants = {
+  idle: { scale: 1, opacity: 1 },
+  pulse: {
+    scale: [1, 1.25, 1],
+    opacity: [1, 0.7, 1],
+    transition: { duration: 0.9, repeat: Infinity, ease: "easeInOut" },
+  },
+};
 
 // ---------------------------------------------------------------------------
 // HP bar colour
@@ -109,14 +140,19 @@ function EnemyArt({ definitionId, name }: { definitionId: string; name: string }
       <img
         src={`/art/enemies/${definitionId}.png`}
         alt={name}
-        className="w-16 h-16 object-cover rounded-lg"
+        // 3:4 aspect ratio — 112px wide × 150px tall
+        className="w-28 rounded-lg object-cover"
+        style={{ aspectRatio: "3 / 4" }}
         onError={() => setErr(true)}
       />
     );
   }
   return (
-    <div className="w-16 h-16 rounded-lg bg-stone-700 flex items-center justify-center">
-      <span className="text-3xl select-none" aria-hidden="true">🦖</span>
+    <div
+      className="w-28 rounded-lg bg-stone-700 flex items-center justify-center"
+      style={{ aspectRatio: "3 / 4" }}
+    >
+      <span className="text-5xl select-none" aria-hidden="true">🦖</span>
     </div>
   );
 }
@@ -130,9 +166,10 @@ interface EnemyCardProps {
   onClick: () => void;
   isPulsing: boolean;
   isShaking: boolean;
+  isEnemyTurn: boolean;
 }
 
-function EnemyCard({ enemy, onClick, isPulsing, isShaking }: EnemyCardProps) {
+function EnemyCard({ enemy, onClick, isPulsing, isShaking, isEnemyTurn }: EnemyCardProps) {
   const prefersReduced = useReducedMotion();
 
   const shakeAnim = isShaking && !prefersReduced
@@ -141,41 +178,64 @@ function EnemyCard({ enemy, onClick, isPulsing, isShaking }: EnemyCardProps) {
 
   const statuses = Object.entries(enemy.statuses) as [StatusKey, number][];
 
+  // Intent badge colours per type
+  const intentBg: Record<IntentType, string> = {
+    attack:  "bg-red-900/90 border-red-700",
+    defend:  "bg-blue-900/90 border-blue-700",
+    buff:    "bg-amber-900/90 border-amber-700",
+    debuff:  "bg-purple-900/90 border-purple-700",
+    unknown: "bg-stone-800/90 border-stone-600",
+  };
+
   return (
     <motion.div
       animate={shakeAnim}
       transition={{ duration: 0.24, ease: "easeInOut" }}
       className="relative flex flex-col items-center"
     >
+      {/* ── Intent badge — floats above the art ── */}
+      <div
+        className={[
+          "flex items-center gap-1.5 px-2.5 py-1 rounded-full border mb-1.5",
+          "text-xs font-bold select-none",
+          intentBg[enemy.nextIntent.type],
+        ].join(" ")}
+        aria-label={`Intenzione: ${enemy.nextIntent.description}`}
+      >
+        {/* Pulse the icon when it's the enemy's turn */}
+        <motion.span
+          variants={intentPulseVariants}
+          animate={isEnemyTurn && !prefersReduced ? "pulse" : "idle"}
+          className="flex items-center"
+        >
+          <IntentIcon type={enemy.nextIntent.type} size="lg" />
+        </motion.span>
+        {enemy.nextIntent.value !== undefined && (
+          <span className={enemy.nextIntent.type === "attack" ? "text-red-200" : "text-blue-200"}>
+            {enemy.nextIntent.value}
+          </span>
+        )}
+        {enemy.nextIntent.type === "unknown" && (
+          <span className="text-stone-300">???</span>
+        )}
+      </div>
+
       <button
         type="button"
         onClick={onClick}
         className={[
-          "relative flex flex-col items-center gap-2 px-4 py-3 rounded-xl",
-          "bg-stone-900/80 backdrop-blur border-2 transition-all duration-150",
+          "relative flex flex-col items-center gap-2 px-3 py-3 rounded-xl",
+          "bg-stone-900/80 backdrop-blur transition-all duration-150",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400",
           isPulsing
-            ? "border-amber-400 shadow-[0_0_24px_rgba(251,191,36,0.5)] animate-pulse"
-            : "border-stone-700 hover:border-stone-500 shadow-lg shadow-black/40",
+            ? "border-[3px] border-amber-400 shadow-[0_0_32px_rgba(251,191,36,0.7)]"
+            : "border-2 border-stone-700 hover:border-stone-500 shadow-lg shadow-black/40",
           enemy.hp <= 0 ? "opacity-30 pointer-events-none" : "",
         ].join(" ")}
         aria-label={`Nemico: HP ${enemy.hp}/${enemy.maxHp}. Clicca per selezionare come bersaglio.`}
         disabled={enemy.hp <= 0}
       >
-        {/* Intent */}
-        <div className="flex items-center gap-1.5 text-xs font-semibold" aria-label={`Intenzione: ${enemy.nextIntent.description}`}>
-          <IntentIcon type={enemy.nextIntent.type} />
-          {enemy.nextIntent.value !== undefined && (
-            <span className={enemy.nextIntent.type === "attack" ? "text-red-400" : "text-blue-400"}>
-              {enemy.nextIntent.value}
-            </span>
-          )}
-          {enemy.nextIntent.type === "unknown" && (
-            <span className="text-stone-400">???</span>
-          )}
-        </div>
-
-        {/* Enemy art */}
+        {/* Enemy art — large and visually dominant */}
         <EnemyArt definitionId={enemy.definitionId} name={enemy.definitionId} />
 
         {/* HP bar */}
@@ -196,7 +256,7 @@ function EnemyCard({ enemy, onClick, isPulsing, isShaking }: EnemyCardProps) {
         {/* Block bubble */}
         {enemy.block > 0 && (
           <div className="flex items-center gap-1 text-blue-300 text-xs font-bold" aria-label={`Blocco: ${enemy.block}`}>
-            <Shield className="w-3 h-3" aria-hidden="true" />
+            <Shield className="w-3.5 h-3.5" aria-hidden="true" />
             {enemy.block}
           </div>
         )}
@@ -313,6 +373,30 @@ export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", go
 
   // Prefersreduced for child components that need it (banner uses CSS only)
   const prefersReduced = useReducedMotion();
+
+  // ---------------------------------------------------------------------------
+  // Background — pick once per combat, stable across re-renders.
+  // Falls back to the gradient if the PNG returns 404.
+  // ---------------------------------------------------------------------------
+
+  const backgroundPath = useMemo(() => {
+    // Prefer an explicit numeric seed on the combat object when available.
+    // @ts-expect-error — combat.seed is not yet in the type definition
+    const seed = (combat?.seed as number | undefined) ?? 0;
+    const idx = Math.abs(seed) % ARENA_BACKGROUNDS.length;
+    return ARENA_BACKGROUNDS[idx] ?? ARENA_BACKGROUNDS[0];
+  // Re-pick only when a new combat session starts (combat identity changes).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [combat?.id]);
+
+  const [bgError, setBgError] = useState(false);
+
+  // Reset error state whenever the path changes (new combat)
+  useEffect(() => { setBgError(false); }, [backgroundPath]);
+
+  const wrapperBackground = bgError
+    ? FALLBACK_GRADIENT
+    : `${BACKGROUND_OVERLAY}, url("${backgroundPath}") center / cover no-repeat`;
 
   // ---------------------------------------------------------------------------
   // Combat log watcher — spawn floating damage numbers
@@ -451,10 +535,20 @@ export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", go
     <div
       className="flex flex-col h-screen text-stone-100 overflow-hidden relative"
       role="main"
-      style={{
-        background: "radial-gradient(ellipse 80% 60% at 50% 20%, #1a2e1a 0%, #0d1f0d 40%, #0a0f0a 100%)",
-      }}
+      style={{ background: wrapperBackground }}
     >
+      {/* Hidden probe image — detects 404 on the background PNG and triggers fallback */}
+      {!bgError && (
+        <img
+          key={backgroundPath}
+          src={backgroundPath}
+          alt=""
+          aria-hidden="true"
+          className="hidden"
+          onError={() => setBgError(true)}
+        />
+      )}
+
       {/* Atmospheric fog layer */}
       <div
         className="absolute inset-0 pointer-events-none z-0"
@@ -513,7 +607,7 @@ export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", go
 
       {/* ── Enemy area (top ~40%) ── */}
       <section
-        className="relative z-10 flex-1 flex items-center justify-center gap-6 px-4 py-4"
+        className="relative z-10 flex-1 flex items-end justify-center gap-8 px-6 pb-6 pt-2"
         aria-label="Area nemici"
       >
         {liveEnemies.map((enemy) => (
@@ -523,6 +617,7 @@ export function CombatScreen({ onCombatEnd, floorLabel = "Atto 1 · Piano 1", go
               onClick={() => handleEnemyClick(enemy.iid)}
               isPulsing={!!selectedCardIid && selectedNeedsTarget && enemy.hp > 0}
               isShaking={shakingRef.current.has(enemy.iid)}
+              isEnemyTurn={isEnemyTurn}
             />
             {/* Floating damage numbers for this enemy */}
             <AnimatePresence>

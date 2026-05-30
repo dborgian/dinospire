@@ -11,7 +11,8 @@
     "generate:art:cards": "tsx scripts/generate-card-art.ts --type cards",
     "generate:art:enemies": "tsx scripts/generate-card-art.ts --type enemies",
     "generate:art:heroes": "tsx scripts/generate-card-art.ts --type heroes",
-    "generate:art:relics": "tsx scripts/generate-card-art.ts --type relics"
+    "generate:art:relics": "tsx scripts/generate-card-art.ts --type relics",
+    "generate:backgrounds": "tsx scripts/generate-arena-backgrounds.ts"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
