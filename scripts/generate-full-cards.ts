@@ -187,25 +187,26 @@ function buildPrompt(card: CardData, hero: string): string {
   const scene    = CARD_SCENES[card.id] ?? 'the dinosaur in a powerful combat stance, dramatic action pose';
   const cardName = card.name.it;
 
+  const flavorLine = flavor
+    ? `At the very bottom of the card, below a thin horizontal separator, a small italicized flavor quote: "${flavor}"`
+    : '';
+
   return [
-    `A professional fantasy trading card game card. Portrait orientation, 3:4 aspect ratio. Hearthstone-quality card design.`,
+    `A professional fantasy trading card game card. Portrait orientation, 3:4 aspect ratio. Hearthstone visual quality.`,
 
-    `CARD FRAME: ${frame}. The frame surrounds the entire card.`,
+    `The card frame uses ${frame} styling and surrounds the entire card.`,
 
-    `TOP SECTION — three elements on one row:`,
-    `  Left: a circular amber gem badge containing the large bold number "${cost}" in white — this is the energy cost.`,
-    `  Center: a decorative stone nameplate banner with the card name "${cardName}" in large bold fantasy serif font (Cinzel style), clearly legible.`,
-    `  Right: a small rectangular badge showing "${card.rarity.toUpperCase()}" in matching frame color.`,
+    `At the top of the card, three elements appear side by side on a single row: on the left a circular gem badge with the bold number "${cost}" in white (the energy cost); in the center a stone nameplate with the card title "${cardName}" in large bold fantasy serif lettering (Cinzel style), clearly legible; on the right a small rounded badge reading "${card.rarity.toUpperCase()}" in the frame's accent color.`,
 
-    `CENTRAL ART (fills the middle 50% of the card height): ${heroDesc}. Scene: ${scene}. Dramatic chiaroscuro lighting, dark background, painterly digital art. The dinosaur is the clear focus.`,
+    `The central illustration occupies roughly half the card height. It shows: ${heroDesc}. Scene: ${scene}. Dramatic chiaroscuro lighting, dark background, painterly digital art style. The dinosaur is the dominant visual focus.`,
 
-    `TYPE BANNER (below the art, full width): ${typeBnr}.`,
+    `Immediately below the illustration, a full-width banner ribbon in ${typeBnr} style marks the card type.`,
 
-    `EFFECT TEXT BOX (below type banner): dark parchment-brown background with subtle texture. Large readable fantasy font. Text: "${effText}"`,
+    `Below that ribbon, a text box with a dark parchment-brown textured background displays in large legible fantasy font the following words and nothing else: "${effText}"`,
 
-    flavor ? `At the very bottom of the card, a small italicized quote in a thin separator box: "${flavor}"` : '',
+    flavorLine,
 
-    `STYLE RULES: painterly digital art, dark color palette (obsidian, volcanic amber, warm gold, stone grey). All text must be clearly legible — no blurry or garbled letters. No watermarks. No lorem ipsum. No placeholder text. The card layout is complete top-to-bottom.`,
+    `Important rules: do not add any label, heading, keyword, or extra word beyond those listed above. The only text on the card is the card title "${cardName}", the cost number "${cost}", the rarity word "${card.rarity.toUpperCase()}", the type ribbon text, the effect sentence "${effText}"${flavor ? `, and the flavor quote "${flavor}"` : ''}. No other text, no watermarks, no lorem ipsum, no placeholder labels. Painterly digital art, dark palette (obsidian, volcanic amber, warm gold, stone grey). All text must be sharp and fully legible.`,
   ].filter(Boolean).join('\n\n');
 }
 
