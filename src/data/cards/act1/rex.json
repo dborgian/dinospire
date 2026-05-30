@@ -22,7 +22,8 @@
     "act": 1,
     "tags": ["carnivoro", "theropode", "predatore"],
     "effects": [{ "kind": "damage", "amount": 11, "target": "enemy" }],
-    "upgraded": { "cost": 1, "effects": [{ "kind": "damage", "amount": 11, "target": "enemy" }] }
+    "upgraded": { "cost": 1, "effects": [{ "kind": "damage", "amount": 13, "target": "enemy" }] },
+    "flavorIt": "Affondo netto, niente di sprecato."
   },
   {
     "id": "coda_spazzante_r",
@@ -113,14 +114,15 @@
     "tags": ["carnivoro", "theropode", "predatore"],
     "effects": [
       { "kind": "damage", "amount": 9, "target": "enemy" },
-      { "kind": "applyStatus", "status": "vigor", "stacks": 3, "target": "self" }
+      { "kind": "applyStatus", "status": "strength", "stacks": 1, "target": "self" }
     ],
     "upgraded": {
       "effects": [
         { "kind": "damage", "amount": 12, "target": "enemy" },
-        { "kind": "applyStatus", "status": "vigor", "stacks": 4, "target": "self" }
+        { "kind": "applyStatus", "status": "strength", "stacks": 2, "target": "self" }
       ]
-    }
+    },
+    "flavorIt": "Ogni carica rafforza il muscolo e l'istinto."
   },
   {
     "id": "sentinella_apex_r",
@@ -144,8 +146,8 @@
     "rarity": "uncommon",
     "act": 1,
     "tags": ["theropode", "carnivoro"],
-    "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 2, "target": "self" }],
-    "upgraded": { "effects": [{ "kind": "applyStatus", "status": "vigor", "stacks": 3, "target": "self" }] },
+    "effects": [{ "kind": "applyStatus", "status": "strength", "stacks": 2, "target": "self" }],
+    "upgraded": { "effects": [{ "kind": "applyStatus", "status": "strength", "stacks": 3, "target": "self" }] },
     "flavorIt": "Il terreno trema. I nemici tremano di più."
   }
 ]
