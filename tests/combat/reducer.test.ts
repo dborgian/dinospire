@@ -98,6 +98,7 @@ function makeTestState(overrides: Partial<CombatState> = {}): CombatState {
       block: 0,
       energy: 3,
       energyMax: 3,
+          handSize: 5,
       statuses: {},
       relicCounters: {} as Record<RelicId, number>,
     },
@@ -320,6 +321,7 @@ describe('combatReducer', () => {
       const state = makeTestState({
         hero: {
           hp: 75, maxHp: 75, block: 0, energy: 3, energyMax: 3,
+          handSize: 5,
           statuses: { weak: 2 },
           relicCounters: {} as Record<RelicId, number>,
         },
@@ -340,6 +342,7 @@ describe('combatReducer', () => {
       const state = makeTestState({
         hero: {
           hp: 75, maxHp: 75, block: 0, energy: 3, energyMax: 3,
+          handSize: 5,
           statuses: { strength: 3 },
           relicCounters: {} as Record<RelicId, number>,
         },
@@ -360,6 +363,7 @@ describe('combatReducer', () => {
       const state = makeTestState({
         hero: {
           hp: 75, maxHp: 75, block: 0, energy: 3, energyMax: 3,
+          handSize: 5,
           statuses: { vigor: 4 },
           relicCounters: {} as Record<RelicId, number>,
         },
@@ -381,6 +385,7 @@ describe('combatReducer', () => {
       const state = makeTestState({
         hero: {
           hp: 75, maxHp: 75, block: 0, energy: 1, energyMax: 3,
+          handSize: 5,
           statuses: {},
           relicCounters: {} as Record<RelicId, number>,
         },
@@ -460,6 +465,7 @@ describe('combatReducer', () => {
       const state = makeTestState({
         hero: {
           hp: 75, maxHp: 75, block: 0, energy: 3, energyMax: 3,
+          handSize: 5,
           statuses: { dexterity: 3 },
           relicCounters: {} as Record<RelicId, number>,
         },
@@ -476,6 +482,7 @@ describe('combatReducer', () => {
       const state = makeTestState({
         hero: {
           hp: 75, maxHp: 75, block: 0, energy: 3, energyMax: 3,
+          handSize: 5,
           statuses: { frail: 1 },
           relicCounters: {} as Record<RelicId, number>,
         },
@@ -529,6 +536,7 @@ describe('combatReducer', () => {
       const state = makeTestState({
         hero: {
           hp: 75, maxHp: 75, block: 15, energy: 3, energyMax: 3,
+          handSize: 5,
           statuses: {},
           relicCounters: {} as Record<RelicId, number>,
         },
@@ -541,6 +549,7 @@ describe('combatReducer', () => {
       const state = makeTestState({
         hero: {
           hp: 75, maxHp: 75, block: 0, energy: 0, energyMax: 3,
+          handSize: 5,
           statuses: {},
           relicCounters: {} as Record<RelicId, number>,
         },
@@ -611,6 +620,7 @@ describe('combatReducer', () => {
       const state = makeTestState({
         hero: {
           hp: 75, maxHp: 75, block: 10, energy: 3, energyMax: 3,
+          handSize: 5,
           statuses: {},
           relicCounters: {} as Record<RelicId, number>,
         },
@@ -885,6 +895,7 @@ describe('combatReducer', () => {
       const state = makeTestState({
         hero: {
           hp: 75, maxHp: 75, block: 0, energy: 5, energyMax: 3,
+          handSize: 5,
           statuses: {},
           relicCounters: {} as Record<RelicId, number>,
         },
@@ -900,6 +911,7 @@ describe('combatReducer', () => {
       const state = makeTestState({
         hero: {
           hp: 50, maxHp: 75, block: 0, energy: 3, energyMax: 3,
+          handSize: 5,
           statuses: {},
           relicCounters: {} as Record<RelicId, number>,
         },
@@ -912,6 +924,7 @@ describe('combatReducer', () => {
       const state = makeTestState({
         hero: {
           hp: 50, maxHp: 75, block: 0, energy: 3, energyMax: 3,
+          handSize: 5,
           statuses: {},
           relicCounters: {} as Record<RelicId, number>,
         },

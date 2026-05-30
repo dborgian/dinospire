@@ -274,6 +274,7 @@ export type CombatState = {
     block: number;
     energy: number;
     energyMax: number;
+    handSize: number;
     statuses: StatusMap;
     relicCounters: Record<RelicId, number>;
   };

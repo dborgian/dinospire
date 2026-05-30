@@ -120,7 +120,10 @@ function handleStart(
   const rng = createSeededRng(combatSeed);
   const shuffledDraw = rng.shuffle(drawOrder) as CardInstanceId[];
 
-  // Build initial state (hero HP comes from enemies array metadata or heroStats)
+  // Use HP from the shell initialized by CombatWrapper (run.hp) so inter-fight
+  // damage persists. Fall back to maxHp only when no valid prior state exists.
+  const currentHp = (prev.hero?.hp ?? 0) > 0 ? prev.hero.hp : heroStats.maxHp;
+
   const initialState: CombatState = {
     runId: prev.runId,
     nodeId: nodeId as NodeId,
@@ -129,11 +132,12 @@ function handleStart(
     phase: 'player_turn',
     cardsPlayedThisTurn: 0,
     hero: {
-      hp: heroStats.maxHp,
+      hp: currentHp,
       maxHp: heroStats.maxHp,
       block: 0,
       energy: heroStats.energyMax,
       energyMax: heroStats.energyMax,
+      handSize: heroStats.handSize,
       statuses: {},
       relicCounters: {} as Record<RelicId, number>,
     },
@@ -283,14 +287,21 @@ function handleEndTurn(
 
   let s = state;
 
-  // ---- Phase 1: Apply end-of-player-turn status effects ----
-  // Player statuses that trigger on turn end (none in base StS for hero)
-  // Enemy statuses affecting hero: poison, bleed, burn
+  // ---- Phase 1: Tick hero periodic statuses (poison/bleed/burn deal damage) ----
   s = withPhase(s, 'enemy_intent');
 
   for (const statusKey of ['poison', 'bleed', 'burn'] as const) {
     s = tickStatusDamageOnHero(s, statusKey);
   }
+
+  // Decrement temporary debuffs on hero (weak/vulnerable/frail lose 1 stack/turn)
+  s = {
+    ...s,
+    hero: {
+      ...s.hero,
+      statuses: decrementDebuffs(s.hero.statuses),
+    },
+  };
 
   // ---- Phase 2: Discard hand → discard pile ----
   const discarded = s.piles.hand;
@@ -314,7 +325,6 @@ function handleEndTurn(
 
       s = executeEnemyMoveInline(s, enemy.iid, def);
 
-      // Check if hero died from enemy attack
       if (isPlayerDead(s)) {
         s = withPhase(s, 'defeat');
         return log(s, 'combat_end', { reason: 'defeat' });
@@ -322,14 +332,22 @@ function handleEndTurn(
     }
   }
 
-  // ---- Phase 4: Apply enemy status ticks (poison on enemies from player) ----
+  // ---- Phase 4: Tick enemy periodic statuses then decrement their debuffs ----
   for (const enemy of s.enemies.filter((e) => e.hp > 0)) {
     for (const statusKey of ['poison', 'bleed', 'burn'] as const) {
       s = tickStatusDamageOnEnemy(s, enemy.iid, statusKey);
     }
+    s = {
+      ...s,
+      enemies: s.enemies.map((e) =>
+        e.iid === enemy.iid
+          ? { ...e, statuses: decrementDebuffs(e.statuses) }
+          : e,
+      ),
+    };
   }
 
-  // Check victory after status ticks (poison might have killed the last enemy)
+  // Check victory after status ticks
   s = checkCombatOver(s);
   if (s.phase === 'victory') return s;
 
@@ -343,19 +361,28 @@ function handleEndTurn(
   s = withPhase(s, 'player_turn');
   s = { ...s, turn: s.turn + 1, cardsPlayedThisTurn: 0 };
 
-  // Reset hero block (full reset — Borea's 50% carry-over is handled at the
-  // call site by the hero-specific middleware, not inside the core reducer)
   s = { ...s, hero: { ...s.hero, block: 0 } };
-
-  // Restore energy to energyMax
   s = { ...s, hero: { ...s.hero, energy: s.hero.energyMax } };
 
-  // Draw new hand (default 5; caller may override via heroStats.handSize)
-  s = drawCards(s, 5);
+  // Use stored handSize (set during START) so Veloce Prime's 6-card hand works
+  s = drawCards(s, s.hero.handSize);
 
   s = log(s, 'turn_start', { turn: s.turn });
 
   return s;
+}
+
+// Decrement temporary debuffs by 1 per turn (weak, vulnerable, frail).
+// Strength, dexterity, vigor (consumed on use) are intentionally NOT here.
+function decrementDebuffs(
+  statuses: Partial<Record<import('../types').StatusKey, number>>,
+): Partial<Record<import('../types').StatusKey, number>> {
+  const result = { ...statuses };
+  for (const key of ['weak', 'vulnerable', 'frail'] as const) {
+    const cur = result[key] ?? 0;
+    if (cur > 0) result[key] = cur - 1;
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -381,11 +408,9 @@ function executeEnemyMoveInline(
     intentType: move.intent.type,
   });
 
-  // Apply move effects — enemy is actor (actorIsHero = false)
-  // For enemy attacks targeting the hero, effects.ts handles 'self' as hero
-  // when actorIsHero=false. The convention: damage effects with target:'self'
-  // from an enemy target the hero.
-  s = applyEffects(s, move.effects, false, undefined);
+  // enemyIid is passed as targetId so that self-targeted status effects
+  // (e.g. pachycephalosaurus applying strength to itself) resolve correctly.
+  s = applyEffects(s, move.effects, false, enemyIid);
 
   // Advance move index
   s = {

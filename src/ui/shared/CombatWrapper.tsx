@@ -115,6 +115,7 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
             block: 0,
             energy: heroStats.energyMax,
             energyMax: heroStats.energyMax,
+            handSize: heroStats.handSize,
             statuses: {},
             relicCounters: run.relicCounters,
           },
