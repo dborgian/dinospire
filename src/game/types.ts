@@ -218,6 +218,7 @@ export type Reward =
 export type RunState = {
   id: RunId;
   seed: number;
+  startedAt: number; // Date.now() at run start, for timer display
   act: 1 | 2 | 3;
   ascensionLevel: number;
   heroId: HeroId;

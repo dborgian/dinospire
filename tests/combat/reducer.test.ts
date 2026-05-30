@@ -76,7 +76,8 @@ function makeEnemyDef(
       {
         id: 'attack',
         intent: { type: 'attack', value: 6, description: 'Attacks for 6' },
-        effects: [{ kind: 'damage', amount: 6, target: 'self' }],
+        // Convention: from enemy POV, target 'enemy' = the hero.
+        effects: [{ kind: 'damage', amount: 6, target: 'enemy' }],
       },
     ],
     movePattern: 'sequential',
@@ -214,7 +215,17 @@ describe('combatReducer', () => {
         deck: [],
         heroStats: { energyMax: 3, handSize: 5, maxHp: 90 },
       };
-      const next = combatReducer(makeTestState(), action);
+      // Fresh shell (hp=0) — engine will fill hp from heroStats.maxHp on START.
+      // If hp > 0 (mid-run preserved HP), maxHp updates but hp is kept.
+      const fresh = makeTestState({
+        hero: {
+          hp: 0, maxHp: 0, block: 0, energy: 0, energyMax: 0,
+          handSize: 5, statuses: {},
+          relics: [] as RelicId[],
+          relicCounters: {} as Record<RelicId, number>,
+        },
+      });
+      const next = combatReducer(fresh, action);
       expect(next.hero.maxHp).toBe(90);
       expect(next.hero.hp).toBe(90);
     });
@@ -517,26 +528,35 @@ describe('combatReducer', () => {
 
   describe('END_TURN', () => {
     it('discards hand to discard pile', () => {
-      const cards = ['c1', 'c2', 'c3'].map((id) => makeCardInstance(id));
+      // Hand cards are end-of-turn-discarded. We seed the draw pile with 5
+      // distinct filler cards so the next-turn draw refills from `draw`
+      // (not by reshuffling the discard into draw, which would yank the
+      // just-discarded cards back into the new hand and obscure the assertion).
+      const handCards = ['c1', 'c2', 'c3'].map((id) => makeCardInstance(id));
+      const drawCards = ['d1', 'd2', 'd3', 'd4', 'd5'].map((id) => makeCardInstance(id));
       const cardInstances: Record<CardInstanceId, CardInstance> = {};
-      for (const c of cards) cardInstances[c.iid] = c;
+      for (const c of [...handCards, ...drawCards]) cardInstances[c.iid] = c;
 
       const state = makeTestState({
         cardInstances,
         piles: {
-          draw: [],
-          hand: cards.map((c) => c.iid),
+          draw: drawCards.map((c) => c.iid),
+          hand: handCards.map((c) => c.iid),
           discard: [],
           exhaust: [],
         },
       });
 
       const next = combatReducer(state, { type: 'END_TURN' });
-      expect(next.piles.hand.length).toBe(0);
-      // Cards end up in discard (before draw refills hand from empty draw pile)
-      const allDiscarded = [...next.piles.discard, ...next.piles.hand];
-      // After END_TURN, draw pile was empty so hand is also empty (nothing to draw)
-      expect(allDiscarded).toEqual(expect.arrayContaining(cards.map((c) => c.iid)));
+      // After end-of-turn discard + redraw: original hand cards live in the
+      // discard pile; the new hand was filled from `draw`.
+      expect(next.piles.discard).toEqual(
+        expect.arrayContaining(handCards.map((c) => c.iid)),
+      );
+      // None of the original hand cards survive into the new hand.
+      for (const c of handCards) {
+        expect(next.piles.hand).not.toContain(c.iid);
+      }
     });
 
     it('resets hero block to 0 at turn start', () => {
@@ -693,7 +713,7 @@ describe('combatReducer', () => {
         moves: [{
           id: 'massive_hit',
           intent: { type: 'attack', value: 100, description: 'Massive hit' },
-          effects: [{ kind: 'damage', amount: 100, target: 'self' }],
+          effects: [{ kind: 'damage', amount: 100, target: 'enemy' }],
         }],
       });
       const defs = new Map<EnemyId, EnemyDefinition>([['e1' as EnemyId, def]]);
@@ -711,7 +731,7 @@ describe('combatReducer', () => {
         moves: [{
           id: 'massive_hit',
           intent: { type: 'attack', value: 100, description: 'Massive hit' },
-          effects: [{ kind: 'damage', amount: 100, target: 'self' }],
+          effects: [{ kind: 'damage', amount: 100, target: 'enemy' }],
         }],
       });
       const defs = new Map<EnemyId, EnemyDefinition>([['e1' as EnemyId, def]]);

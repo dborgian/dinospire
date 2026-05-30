@@ -71,10 +71,12 @@ function buildInitialRun(
   starterRelic: RelicId,
   baseHp: number,
 ): RunState {
+  const now = Date.now();
   const map = generateActMap(1, seed);
   return {
-    id: `run_${seed}_${Date.now()}` as RunState['id'],
+    id: `run_${seed}_${now}` as RunState['id'],
     seed,
+    startedAt: now,
     act: 1,
     ascensionLevel,
     heroId,
