@@ -122,9 +122,9 @@ const RARITY_FRAME: Record<string, string> = {
 };
 
 const TYPE_BANNER: Record<string, string> = {
-  attack: 'crimson red banner labeled ATTACCO with a sword icon on the left',
-  skill:  'sapphire blue banner labeled ABILITÀ with a shield icon on the left',
-  power:  'amber gold banner labeled POTERE with a star/sparkle icon on the left',
+  attack: 'crimson red banner with a sword icon on the left and the word ATTACCO in large bold capitals',
+  skill:  'sapphire blue banner with a shield icon on the left and the word ABILITA in large bold capitals',
+  power:  'amber gold banner with a sparkle icon on the left and the word POTERE in large bold capitals',
 };
 
 // ---------------------------------------------------------------------------
@@ -138,9 +138,9 @@ const STATUS_IT: Record<string, string> = {
   poison:      'Veleno',
   vigor:       'Vigore',
   thorns:      'Spine',
-  regen:       'Rigenerazione',
+  regen:       'Regen',
   frail:       'Fragile',
-  burn:        'Bruciatura',
+  burn:        'Fuoco',
 };
 
 function statusName(key: string): string {
@@ -175,6 +175,10 @@ function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+function stripAccents(s: string): string {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
 // ---------------------------------------------------------------------------
 // Full-card prompt builder
 // ---------------------------------------------------------------------------
@@ -183,33 +187,31 @@ function buildPrompt(card: CardData, hero: string): string {
   const frame    = RARITY_FRAME[card.rarity] ?? RARITY_FRAME.common;
   const typeBnr  = TYPE_BANNER[card.type] ?? TYPE_BANNER.skill;
   const cost     = card.cost === 'X' ? 'X' : String(card.cost);
-  const effText  = effectText(card.effects);
-  const flavor   = card.flavorIt ? card.flavorIt.slice(0, 80) : null;
+  const effText  = stripAccents(effectText(card.effects));
   const heroDesc = HERO_DINO[hero] ?? HERO_DINO.borea;
   const scene    = CARD_SCENES[card.id] ?? 'the dinosaur in a powerful combat stance, dramatic action pose';
-  const cardName = card.name.it;
-
-  const flavorLine = flavor
-    ? `At the very bottom of the card, below a thin horizontal separator, a small italicized flavor quote: "${flavor}"`
-    : '';
+  const cardName = stripAccents(card.name.it);
+  const rarityLabel = card.rarity.toUpperCase();
 
   return [
-    `A professional fantasy trading card game card. Portrait orientation, 3:4 aspect ratio. Hearthstone visual quality.`,
+    `A professional fantasy trading card game card. Portrait orientation, 3:4 aspect ratio. Hearthstone visual quality. Painterly digital art, dark atmospheric palette (obsidian blacks, volcanic amber, warm gold, stone grey).`,
 
     `The card frame uses ${frame} styling and surrounds the entire card.`,
 
-    `At the top of the card, three elements appear side by side on a single row: on the left a circular gem badge with the bold number "${cost}" in white (the energy cost); in the center a stone nameplate with the card title "${cardName}" in large bold fantasy serif lettering (Cinzel style), clearly legible; on the right a small rounded badge reading "${card.rarity.toUpperCase()}" in the frame's accent color.`,
+    `At the top of the card: on the left a circular gem badge with only the number "${cost}" in bold white; in the center a stone nameplate with only the title "${cardName}" in large bold fantasy serif lettering; on the right a small badge with only the word "${rarityLabel}".`,
 
-    `The central illustration occupies roughly half the card height. It shows: ${heroDesc}. Scene: ${scene}. Dramatic chiaroscuro lighting, dark background, painterly digital art style. The dinosaur is the dominant visual focus.`,
+    `The central illustration occupies roughly half the card height. It shows: ${heroDesc}. Scene: ${scene}. Dramatic chiaroscuro lighting, one strong directional light source, painterly brushwork. The dinosaur is the dominant visual focus.`,
 
-    `Immediately below the illustration, a full-width banner ribbon in ${typeBnr} style marks the card type.`,
+    `Immediately below the illustration, a full-width banner ribbon: ${typeBnr}.`,
 
-    `Below that ribbon, a text box with a dark parchment-brown textured background displays in large legible fantasy font the following words and nothing else: "${effText}"`,
+    `Below that ribbon, a parchment-brown text box displaying only this sentence in a large legible serif font: "${effText}"`,
 
-    flavorLine,
-
-    `Important rules: do not add any label, heading, keyword, or extra word beyond those listed above. The only text on the card is the card title "${cardName}", the cost number "${cost}", the rarity word "${card.rarity.toUpperCase()}", the type ribbon text, the effect sentence "${effText}"${flavor ? `, and the flavor quote "${flavor}"` : ''}. No other text, no watermarks, no lorem ipsum, no placeholder labels. Painterly digital art, dark palette (obsidian, volcanic amber, warm gold, stone grey). All text must be sharp and fully legible.`,
-  ].filter(Boolean).join('\n\n');
+    `CRITICAL RULES — do not break these:
+- The ONLY words allowed on the entire card are: the title "${cardName}", the number "${cost}", the word "${rarityLabel}", the banner type word, and the effect sentence "${effText}".
+- Do NOT add any other text, label, heading, description, watermark, flavor text, lorem ipsum, random letters, or any other writing anywhere on the card.
+- Do NOT invent new words or paraphrase the effect text — copy it exactly.
+- All rendered text must use standard ASCII characters only — no accents, no special characters.`,
+  ].join('\n\n');
 }
 
 // ---------------------------------------------------------------------------
