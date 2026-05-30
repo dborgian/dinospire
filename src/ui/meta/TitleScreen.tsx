@@ -105,9 +105,15 @@ function HeroCard({ hero, selected, onSelect }: HeroCardProps) {
 }
 
 // ---- Main TitleScreen ----
-export default function TitleScreen() {
+interface TitleScreenProps {
+  onActivate?: () => void;
+}
+
+export default function TitleScreen({ onActivate }: TitleScreenProps) {
   const profile = useMetaStore((s) => s.profile);
   const dispatch = useRunStore((s) => s.dispatch);
+  const existingRun = useRunStore((s) => s.run);
+  const clearRun = useRunStore((s) => s.clearRun);
 
   const [heroes, setHeroes] = useState<HeroDefinition[]>([]);
   const [selectedHeroId, setSelectedHeroId] = useState<HeroId | null>(null);
@@ -154,7 +160,13 @@ export default function TitleScreen() {
       baseHp: heroDef.stages.cucciolo.hp,
     };
 
+    clearRun();
     dispatch(action);
+    onActivate?.();
+  }
+
+  function handleResume() {
+    onActivate?.();
   }
 
   return (
@@ -204,23 +216,38 @@ export default function TitleScreen() {
       </section>
 
       {/* CTA */}
-      <motion.button
-        type="button"
-        onClick={handleStart}
-        disabled={!selectedHeroId}
-        aria-disabled={!selectedHeroId}
-        className={[
-          'h-14 px-10 rounded-lg font-bold tracking-widest text-lg uppercase transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300',
-          selectedHeroId
-            ? 'bg-amber-600 hover:bg-amber-500 text-stone-950 cursor-pointer'
-            : 'bg-stone-800 text-stone-600 cursor-not-allowed',
-        ].join(' ')}
-        whileHover={selectedHeroId ? { scale: 1.03 } : {}}
-        whileTap={selectedHeroId ? { scale: 0.97 } : {}}
-      >
-        Inizia Avventura
-      </motion.button>
+      <div className="flex flex-col items-center gap-3">
+        {/* Resume run button — only shown when a run already exists in this browser */}
+        {existingRun && (
+          <motion.button
+            type="button"
+            onClick={handleResume}
+            className="h-12 px-8 rounded-lg font-bold tracking-widest text-base uppercase transition-colors bg-stone-700 hover:bg-stone-600 text-stone-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            ▶ Continua Partita
+          </motion.button>
+        )}
+
+        <motion.button
+          type="button"
+          onClick={handleStart}
+          disabled={!selectedHeroId}
+          aria-disabled={!selectedHeroId}
+          className={[
+            'h-14 px-10 rounded-lg font-bold tracking-widest text-lg uppercase transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300',
+            selectedHeroId
+              ? 'bg-amber-600 hover:bg-amber-500 text-stone-950 cursor-pointer'
+              : 'bg-stone-800 text-stone-600 cursor-not-allowed',
+          ].join(' ')}
+          whileHover={selectedHeroId ? { scale: 1.03 } : {}}
+          whileTap={selectedHeroId ? { scale: 0.97 } : {}}
+        >
+          {existingRun ? '↺ Nuova Partita' : 'Inizia Avventura'}
+        </motion.button>
+      </div>
 
       {/* Run stats footer */}
       {profile.totalRuns > 0 && (
