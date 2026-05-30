@@ -12,7 +12,10 @@
     "generate:art:enemies": "tsx scripts/generate-card-art.ts --type enemies",
     "generate:art:heroes": "tsx scripts/generate-card-art.ts --type heroes",
     "generate:art:relics": "tsx scripts/generate-card-art.ts --type relics",
-    "generate:backgrounds": "tsx scripts/generate-arena-backgrounds.ts"
+    "generate:backgrounds": "tsx scripts/generate-arena-backgrounds.ts",
+    "generate:fullcards": "tsx scripts/generate-full-cards.ts --hero borea",
+    "generate:fullcards:rex": "tsx scripts/generate-full-cards.ts --hero rex",
+    "generate:fullcards:veloce": "tsx scripts/generate-full-cards.ts --hero veloce"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
