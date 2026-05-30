@@ -632,10 +632,10 @@ export function CombatScreen({
   // Enemy shaking state (iid → boolean)
   const shakingRef = useRef<Set<EnemyId>>(new Set());
 
-  // Particle hit bursts — written by log watcher, read by EnemyHitParticles canvas
-  const burstsRef = useRef<HitBurst[]>([]);
+  // Particle hit bursts — written by log watcher, read by EnemyHitParticles loop
+  const burstsRef    = useRef<HitBurst[]>([]);
   const burstCounter = useRef(0);
-  // DOM refs per enemy card (iid → container div) — used to measure screen position
+  // DOM refs per enemy (iid → container div) for screen-position measurement
   const enemyElemRefs = useRef<Map<EnemyId, HTMLDivElement>>(new Map());
 
   // Floating damage numbers keyed per enemy iid
@@ -719,13 +719,13 @@ export function CombatScreen({
             setFloatNums((prev) => [...prev, { id: numId, amount: finalDmg, isBlock: false, enemyIid: targetId as EnemyId }]);
             setTimeout(() => setFloatNums((prev) => prev.filter((n) => n.id !== numId)), 800);
 
-            // Spawn particle hit burst at enemy card position
+            // Particle burst at enemy card position
             const el = enemyElemRefs.current.get(targetId as EnemyId);
             if (el) {
               const rect = el.getBoundingClientRect();
               const burst: HitBurst = {
                 id: ++burstCounter.current,
-                nx: (rect.left + rect.width * 0.5) / window.innerWidth,
+                nx: (rect.left + rect.width  * 0.5) / window.innerWidth,
                 ny: (rect.top  + rect.height * 0.35) / window.innerHeight,
                 startTime: Date.now() / 1000,
               };
@@ -1043,7 +1043,7 @@ export function CombatScreen({
         )}
       </AnimatePresence>
 
-      {/* Particle hit effects — transparent Three.js canvas overlay */}
+      {/* Particle hit effects — vanilla Three.js canvas, no R3F */}
       <EnemyHitParticles burstsRef={burstsRef} />
     </div>
   );
