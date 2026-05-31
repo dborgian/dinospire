@@ -55,7 +55,7 @@ export type RunAction =
   | { type: 'REST_UPGRADE'; cardIid: CardInstanceId }
   | { type: 'REST_REMOVE'; cardIid: CardInstanceId }
   | { type: 'BUY'; item: Reward }
-  | { type: 'GROWTH_EVOLVE' }
+  | { type: 'GROWTH_EVOLVE'; newMaxHp: number }
   | { type: 'ACT_COMPLETE'; nextAct: 2 | 3 }
   | { type: 'UPDATE_EVOLUTION_CONDITIONS'; delta: Record<string, number> };
 
@@ -228,6 +228,7 @@ function applyEventEffect(state: RunState, effect: CardEffect, idx: number): Run
     case 'conditional':
     case 'synergy':
     case 'repeat':
+    case 'onKillGainGold':
       // These effects require active combat context; ignored in event resolution
       return state;
   }
@@ -379,18 +380,38 @@ export function runReducer(state: RunState, action: RunAction): RunState {
       if (state.phase.t !== 'reward') return state;
       const currentPool = state.phase.pool;
 
+      // Guard: ensure the reward is still in the pool before applying it.
+      // Without this check a double-click on gold would call applyReward twice
+      // (the second dispatch sees the reward already removed but applies it again).
+      const rewardInPool = action.reward === null
+        ? true
+        : currentPool.some((r) => JSON.stringify(r) === JSON.stringify(action.reward));
+      if (!rewardInPool) return state;
+
       // Apply reward if not skipping
       const stateAfterReward = action.reward !== null
         ? applyReward(state, action.reward)
         : state;
 
-      // Remove the picked/skipped reward from pool
-      const remainingPool = action.reward !== null
-        ? currentPool.filter(
-            (r) => !(r.kind === action.reward!.kind &&
-              JSON.stringify(r) === JSON.stringify(action.reward)),
-          )
-        : [];
+      // Remove picked reward(s) from pool.
+      // Card pick: drop ALL card options (player may pick only one per combat).
+      // Gold/relic pick: drop only the first exact match (avoid removing duplicates).
+      // Skip (null): clear entire pool.
+      const remainingPool = action.reward === null
+        ? []
+        : action.reward.kind === 'card'
+          ? currentPool.filter((r) => r.kind !== 'card')
+          : (() => {
+              let removed = false;
+              return currentPool.filter((r) => {
+                if (!removed && r.kind === action.reward!.kind &&
+                    JSON.stringify(r) === JSON.stringify(action.reward)) {
+                  removed = true;
+                  return false;
+                }
+                return true;
+              });
+            })();
 
       // If pool is empty, return to map; otherwise show remaining rewards
       const nextPhase: RunPhase = remainingPool.length === 0
@@ -448,9 +469,12 @@ export function runReducer(state: RunState, action: RunAction): RunState {
     case 'GROWTH_EVOLVE': {
       if (state.phase.t !== 'growth') return state;
       const newStage = nextStage(state.evolutionStage);
+      const hpGain = Math.max(0, action.newMaxHp - state.maxHp);
       return {
         ...state,
         evolutionStage: newStage,
+        maxHp: action.newMaxHp,
+        hp: Math.min(action.newMaxHp, state.hp + hpGain),
         phase: { t: 'map' },
       };
     }

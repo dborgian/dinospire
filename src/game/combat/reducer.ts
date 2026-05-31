@@ -131,6 +131,7 @@ function handleStart(
     turn: 1,
     phase: 'player_turn',
     cardsPlayedThisTurn: 0,
+    pendingGold: 0,
     hero: {
       hp: currentHp,
       maxHp: heroStats.maxHp,

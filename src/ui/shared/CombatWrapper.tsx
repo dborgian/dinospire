@@ -109,6 +109,7 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
           turn: 0,
           phase: 'player_turn',
           cardsPlayedThisTurn: 0,
+          pendingGold: 0,
           hero: {
             hp: run.hp,
             maxHp: run.maxHp,
@@ -187,10 +188,24 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
       rng,
     );
 
+    const pendingGold = getCombat?.pendingGold ?? 0;
+
+    // Merge kill-bonus gold into the existing gold reward to avoid duplicate entries
+    // that could confuse the JSON.stringify-based pool filter in PICK_REWARD.
+    let mergedPool = rewardPool;
+    if (pendingGold > 0) {
+      let merged = false;
+      mergedPool = rewardPool.map((r) => {
+        if (!merged && r.kind === 'gold') { merged = true; return { ...r, amount: r.amount + pendingGold }; }
+        return r;
+      });
+      if (!merged) mergedPool = [{ kind: 'gold', amount: pendingGold }, ...mergedPool];
+    }
+
     clearCombat();
     runDispatch({
       type: 'COMBAT_VICTORY',
-      rewards: rewardPool,
+      rewards: mergedPool,
       statsDelta: { combatsWon: 1 },
       heroHpAfter,
     });
@@ -238,6 +253,7 @@ export default function CombatWrapper({ nodeId }: CombatWrapperProps) {
       floorLabel={floorLabel}
       gold={run?.gold ?? 0}
       heroId={run?.heroId ?? 'borea'}
+      evolutionStage={run?.evolutionStage ?? 'cucciolo'}
       relics={run?.relics ?? []}
     />
   );

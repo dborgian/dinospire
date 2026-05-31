@@ -145,9 +145,20 @@ export function applyRelicEquipEffects(run: RunState, relicId: RelicId): RunStat
   }
 
   if (relicId === ('uovo_del_primo' as RelicId)) {
-    // Skip cucciolo → start at adulto if still at cucciolo
+    // Skip cucciolo → adulto; also apply the adulto maxHp boost.
+    // HP values per hero are game constants mirrored from heroes.json.
+    const ADULTO_HP: Partial<Record<string, number>> = {
+      rex: 104, veloce: 91, borea: 101,
+    };
     if (next.evolutionStage === 'cucciolo') {
-      next = { ...next, evolutionStage: 'adulto' };
+      const adultoHp = ADULTO_HP[next.heroId as string] ?? next.maxHp;
+      const hpGain = Math.max(0, adultoHp - next.maxHp);
+      next = {
+        ...next,
+        evolutionStage: 'adulto',
+        maxHp: adultoHp,
+        hp: Math.min(adultoHp, next.hp + hpGain),
+      };
     }
   }
 

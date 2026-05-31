@@ -93,6 +93,7 @@ function makeTestState(overrides: Partial<CombatState> = {}): CombatState {
     turn: 1,
     phase: 'player_turn',
     cardsPlayedThisTurn: 0,
+    pendingGold: 0,
     hero: {
       hp: 75,
       maxHp: 75,

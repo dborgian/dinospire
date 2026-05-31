@@ -104,6 +104,7 @@ export default function GameOverScreen({ reason }: GameOverScreenProps) {
   const clearRun         = useRunStore((s) => s.clearRun);
   const recordRunEnd     = useMetaStore((s) => s.recordRunEnd);
   const advanceAscension = useMetaStore((s) => s.advanceAscension);
+  const grantUnlock      = useMetaStore((s) => s.grantUnlock);
   const metaProfile      = useMetaStore((s) => s.profile);
   const { user, signIn } = useAuthStore();
   const recorded         = useRef(false);
@@ -122,8 +123,19 @@ export default function GameOverScreen({ reason }: GameOverScreenProps) {
     if (recorded.current) return;
     recorded.current = true;
     recordRunEnd(isVictory);
-    if (isVictory) advanceAscension();
-  }, [isVictory, recordRunEnd, advanceAscension]);
+    if (isVictory) {
+      advanceAscension();
+      // Persist every relic earned during this victory run to meta-progression
+      // so they are available (e.g. as unlocked pool) in future runs.
+      // runSnapshot.current is captured before clearRun, so relics are intact.
+      const snap = runSnapshot.current;
+      if (snap) {
+        for (const relicId of snap.relics) {
+          grantUnlock('relic', relicId);
+        }
+      }
+    }
+  }, [isVictory, recordRunEnd, advanceAscension, grantUnlock]);
 
   // Submit score whenever user is available (auto on mount if signed in,
   // or after sign-in popup resolves)

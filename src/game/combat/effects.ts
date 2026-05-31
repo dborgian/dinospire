@@ -770,6 +770,15 @@ function resolveEffect(
     }
 
     // ------------------------------------------------------------------
+    // Killing-blow bonus — fires only when the last enemy is dead.
+    // ------------------------------------------------------------------
+    case 'onKillGainGold': {
+      const allDead = state.enemies.every((e) => e.hp === 0);
+      if (!allDead) return state;
+      return { ...state, pendingGold: (state.pendingGold ?? 0) + effect.amount };
+    }
+
+    // ------------------------------------------------------------------
     // Event-only effects — resolved at run level (machine.ts).
     // No-ops in combat context to keep the union exhaustive.
     // ------------------------------------------------------------------

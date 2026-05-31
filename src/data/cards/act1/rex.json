@@ -149,5 +149,26 @@
     "effects": [{ "kind": "applyStatus", "status": "strength", "stacks": 2, "target": "self" }],
     "upgraded": { "effects": [{ "kind": "applyStatus", "status": "strength", "stacks": 3, "target": "self" }] },
     "flavorIt": "Il terreno trema. I nemici tremano di più."
+  },
+  {
+    "id": "stangata_r",
+    "name": { "it": "La Stangata" },
+    "hero": "rex",
+    "cost": 2,
+    "type": "attack",
+    "rarity": "uncommon",
+    "act": 1,
+    "tags": ["carnivoro", "theropode", "predatore"],
+    "effects": [
+      { "kind": "damage", "amount": 14, "target": "enemy" },
+      { "kind": "onKillGainGold", "amount": 12 }
+    ],
+    "upgraded": {
+      "effects": [
+        { "kind": "damage", "amount": 18, "target": "enemy" },
+        { "kind": "onKillGainGold", "amount": 18 }
+      ]
+    },
+    "flavorIt": "L'ultimo morso vale doppio."
   }
 ]

@@ -88,6 +88,8 @@ function effectSummary(def: Card, isUpgraded: boolean): string {
       parts.push("Sinergia di branco.");
     } else if (eff.kind === "repeat") {
       parts.push("Ripeti effetto.");
+    } else if (eff.kind === "onKillGainGold") {
+      parts.push(`Colpo finale: +${eff.amount} Oro.`);
     }
   }
 
@@ -144,6 +146,16 @@ function FullCard({
   const typeStyle = TYPE_STYLES[definition.type];
   const costIsOverridden = instance.costOverride !== undefined;
 
+  // Upgraded border is applied directly on the article via box-shadow (outline-style)
+  // so it stays visible despite overflow-hidden. ring-* on child divs gets clipped.
+  const upgradedBorderStyle = instance.upgraded
+    ? {
+        outline: "2px solid rgb(251 191 36)",  // amber-400
+        outlineOffset: "-2px",                  // inset so overflow-hidden doesn't clip it
+        boxShadow: "0 0 20px 4px rgba(251,191,36,0.55), inset 0 0 0 2px rgba(251,191,36,0.35)",
+      }
+    : undefined;
+
   return (
     <motion.article
       {...drawVariants}
@@ -157,13 +169,17 @@ function FullCard({
         exhaustStyle,
         "transition-all duration-150",
       ].filter(Boolean).join(" ")}
-      style={{ width: "clamp(120px, 10vw, 200px)", aspectRatio: "5/7" }}
+      style={{
+        width: "clamp(120px, 10vw, 200px)",
+        aspectRatio: "5/7",
+        ...upgradedBorderStyle,
+      }}
       onClick={onClick}
       role="button"
       tabIndex={isExhausted ? -1 : 0}
       aria-pressed={isSelected}
       aria-disabled={!isPlayable || isExhausted}
-      aria-label={`${definition.name.it}, costo ${displayedCost}, ${typeStyle.label}`}
+      aria-label={`${definition.name.it}${instance.upgraded ? " (potenziata)" : ""}, costo ${displayedCost}, ${typeStyle.label}`}
       onKeyDown={onKeyDown}
     >
       {/* Full card image as background */}
@@ -184,11 +200,17 @@ function FullCard({
         </div>
       )}
 
-      {/* Upgraded indicator */}
+      {/* Upgraded indicator — "+" badge top-right + bottom banner */}
       {instance.upgraded && (
         <>
-          {/* Amber glow border on the card */}
-          <div className="absolute inset-0 rounded-xl pointer-events-none ring-2 ring-amber-400 shadow-[0_0_18px_rgba(251,191,36,0.6)]" />
+          {/* Corner badge — always visible regardless of image content */}
+          <div
+            className="absolute top-1 right-1 z-10 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black text-stone-950 leading-none select-none pointer-events-none"
+            style={{ background: "rgb(251 191 36)", boxShadow: "0 0 6px rgba(251,191,36,0.8)" }}
+            aria-hidden="true"
+          >
+            +
+          </div>
           {/* POTENZIATA banner */}
           <div className="absolute bottom-0 inset-x-0 z-10 bg-amber-400/90 text-stone-950 text-[8px] font-black text-center tracking-widest py-0.5 uppercase">
             ✦ Potenziata ✦

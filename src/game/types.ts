@@ -64,6 +64,8 @@ export type CardEffect =
   | { kind: 'conditional'; if: Predicate; then: CardEffect[]; else?: CardEffect[] }
   | { kind: 'synergy'; minCards: number; tags: CardTag[]; bonus: CardEffect[] }
   | { kind: 'repeat'; times: number | DynExpr; effect: CardEffect }
+  // ---- Killing-blow bonus — fires if this card kills the last enemy ----
+  | { kind: 'onKillGainGold'; amount: number }
   // ---- Event-only effects (no-op in combat context) ----
   | { kind: 'gainGold'; amount: number }
   | { kind: 'gainMaxHp'; amount: number }
@@ -276,6 +278,8 @@ export type CombatState = {
   turn: number;
   phase: CombatPhase;
   cardsPlayedThisTurn: number;
+  /** Gold accumulated from on-kill card effects; added to rewards on victory. */
+  pendingGold: number;
   hero: {
     hp: number;
     maxHp: number;

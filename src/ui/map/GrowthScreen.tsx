@@ -38,7 +38,8 @@ export default function GrowthScreen() {
   const nextStats    = heroDef?.stages[nextStage];
 
   function handleContinue() {
-    dispatch({ type: 'GROWTH_EVOLVE' });
+    if (!nextStats) return;
+    dispatch({ type: 'GROWTH_EVOLVE', newMaxHp: nextStats.hp });
   }
 
   return (

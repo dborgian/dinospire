@@ -1,98 +1,38 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRunStore } from '../../stores/runStore';
-import { getRelic, getCard, loadRelics } from '../../game/content/index';
-import type { Reward, RelicDefinition, Card } from '../../game/types';
+import { getCard, loadCards, getRelic, loadRelics } from '../../game/content/index';
+import { Card } from '../shared/Card';
+import type { Reward, Card as CardDef, RelicDefinition, CardInstanceId } from '../../game/types';
 
-// ---- Individual reward cards ----
-
-interface CardRewardProps {
-  reward: Extract<Reward, { kind: 'card' }>;
-  onPick: (r: Reward) => void;
-}
-
-function CardReward({ reward, onPick }: CardRewardProps) {
-  const [cardDef, setCardDef] = useState<Card | null>(null);
-
-  useEffect(() => {
-    const def = getCard(reward.cardId);
-    if (def) {
-      setCardDef(def);
-    }
-  }, [reward.cardId]);
-
-  const typeColour: Record<string, string> = {
-    attack: 'border-red-700',
-    skill:  'border-blue-700',
-    power:  'border-purple-700',
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={() => onPick(reward)}
-      aria-label={`Scegli carta: ${cardDef?.name.it ?? reward.cardId}`}
-      className={[
-        'flex flex-col items-center rounded-xl bg-stone-900 border-2 p-4 w-36 gap-2',
-        'cursor-pointer hover:bg-stone-800 transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400',
-        cardDef ? typeColour[cardDef.type] ?? 'border-stone-600' : 'border-stone-600',
-      ].join(' ')}
-    >
-      <div className="w-full aspect-square flex items-center justify-center bg-stone-800 rounded-lg text-4xl select-none" aria-hidden="true">
-        {cardDef?.type === 'attack' ? '⚔' : cardDef?.type === 'skill' ? '🛡' : '✨'}
-      </div>
-      <span className="font-bold text-stone-100 text-sm text-center leading-tight">
-        {cardDef?.name.it ?? reward.cardId}
-      </span>
-      {cardDef && (
-        <span className="text-stone-500 text-xs">
-          Costo {cardDef.cost}⚡
-        </span>
-      )}
-      {cardDef && (
-        <span className={[
-          'text-xs px-1.5 py-0.5 rounded-full',
-          cardDef.rarity === 'rare'     ? 'bg-yellow-800 text-yellow-300' :
-          cardDef.rarity === 'uncommon' ? 'bg-blue-900 text-blue-300'     :
-                                          'bg-stone-700 text-stone-400',
-        ].join(' ')}>
-          {cardDef.rarity}
-        </span>
-      )}
-    </button>
-  );
-}
+// ---- Relic reward ----
 
 interface RelicRewardProps {
   reward: Extract<Reward, { kind: 'relic' }>;
   onPick: (r: Reward) => void;
+  disabled: boolean;
 }
 
-function RelicReward({ reward, onPick }: RelicRewardProps) {
+function RelicReward({ reward, onPick, disabled }: RelicRewardProps) {
   const [relicDef, setRelicDef] = useState<RelicDefinition | null>(null);
 
   useEffect(() => {
-    // Try synchronous lookup first; relics may already be cached
     const cached = getRelic(reward.relicId);
-    if (cached) {
-      setRelicDef(cached);
-      return;
-    }
-    // Fallback: load relics then look up
-    loadRelics().then(() => {
-      setRelicDef(getRelic(reward.relicId) ?? null);
-    });
+    if (cached) { setRelicDef(cached); return; }
+    loadRelics().then(() => setRelicDef(getRelic(reward.relicId) ?? null));
   }, [reward.relicId]);
 
   return (
     <button
       type="button"
       onClick={() => onPick(reward)}
+      disabled={disabled}
       aria-label={`Scegli reliquia: ${relicDef?.name.it ?? reward.relicId}`}
       className={[
         'flex flex-col items-center rounded-xl bg-stone-900 border-2 border-amber-700 p-4 w-36 gap-2',
-        'cursor-pointer hover:bg-stone-800 transition-colors',
+        disabled
+          ? 'opacity-50 cursor-not-allowed'
+          : 'cursor-pointer hover:bg-stone-800 transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400',
       ].join(' ')}
     >
@@ -111,20 +51,26 @@ function RelicReward({ reward, onPick }: RelicRewardProps) {
   );
 }
 
+// ---- Gold reward ----
+
 interface GoldRewardProps {
   reward: Extract<Reward, { kind: 'gold' }>;
   onPick: (r: Reward) => void;
+  disabled: boolean;
 }
 
-function GoldReward({ reward, onPick }: GoldRewardProps) {
+function GoldReward({ reward, onPick, disabled }: GoldRewardProps) {
   return (
     <button
       type="button"
       onClick={() => onPick(reward)}
-      aria-label={`Scegli oro: ${reward.amount} monete`}
+      disabled={disabled}
+      aria-label={`Prendi oro: ${reward.amount} monete`}
       className={[
         'flex flex-col items-center rounded-xl bg-stone-900 border-2 border-yellow-700 p-4 w-36 gap-2',
-        'cursor-pointer hover:bg-stone-800 transition-colors',
+        disabled
+          ? 'opacity-50 cursor-not-allowed'
+          : 'cursor-pointer hover:bg-stone-800 transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400',
       ].join(' ')}
     >
@@ -137,26 +83,115 @@ function GoldReward({ reward, onPick }: GoldRewardProps) {
   );
 }
 
-// ---- Stagger animation wrapper ----
+// ---- Card reward — uses the full Card component ----
+
+interface CardRewardProps {
+  reward: Extract<Reward, { kind: 'card' }>;
+  cardDefs: Map<string, CardDef>;
+  onPick: (r: Reward) => void;
+  disabled: boolean;
+}
+
+function CardReward({ reward, cardDefs, onPick, disabled }: CardRewardProps) {
+  const def = cardDefs.get(reward.cardId);
+  if (!def) {
+    // Definition not loaded yet — show placeholder
+    return (
+      <div className="flex flex-col items-center rounded-xl bg-stone-900 border-2 border-stone-600 p-4 w-36 gap-2 animate-pulse">
+        <div className="w-full aspect-[5/7] bg-stone-800 rounded-lg" />
+        <span className="text-stone-500 text-xs">{reward.cardId}</span>
+      </div>
+    );
+  }
+
+  const instance = {
+    iid: `reward_${reward.cardId}` as CardInstanceId,
+    cardId: reward.cardId,
+    upgraded: false,
+    temporary: false,
+  };
+
+  const selectHandler = disabled ? {} : { onSelect: () => onPick(reward) };
+
+  return (
+    <Card
+      instance={instance}
+      definition={def}
+      state="hand"
+      isPlayable={!disabled}
+      {...selectHandler}
+    />
+  );
+}
+
+// ---- Stagger animation ----
+
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.15 } },
+  visible: { transition: { staggerChildren: 0.12 } },
 };
-
 const itemVariants = {
   hidden:  { scale: 0, opacity: 0 },
   visible: { scale: 1, opacity: 1, transition: { type: 'spring' as const, stiffness: 280, damping: 22 } },
 };
 
 // ---- Main RewardScreen ----
+
 interface RewardScreenProps {
   pool: Reward[];
 }
 
 export default function RewardScreen({ pool }: RewardScreenProps) {
   const dispatch = useRunStore((s) => s.dispatch);
+  const run      = useRunStore((s) => s.run);
+  const [cardDefs, setCardDefs] = useState<Map<string, CardDef>>(new Map());
+  // Prevent double-dispatch: once any reward is picked, lock the UI until the
+  // pool prop updates (which happens synchronously after the store update).
+  const pickingRef = useRef(false);
+
+  // Reset the lock whenever the pool changes (a pick was processed and the
+  // store emitted a new pool).
+  useEffect(() => {
+    pickingRef.current = false;
+  }, [pool]);
+
+  // Load definitions for all card rewards in the pool
+  useEffect(() => {
+    const cardRewards = pool.filter((r): r is Extract<Reward, { kind: 'card' }> => r.kind === 'card');
+    if (cardRewards.length === 0) return;
+
+    // Try synchronous lookup first (registry already populated by combat)
+    const map = new Map<string, CardDef>();
+    let allFound = true;
+    for (const r of cardRewards) {
+      const def = getCard(r.cardId);
+      if (def) { map.set(r.cardId, def); }
+      else { allFound = false; }
+    }
+    if (allFound) { setCardDefs(map); return; }
+
+    // Fallback: async load
+    const act = run?.act ?? 1;
+    loadCards(act).then((cards) => {
+      const full = new Map<string, CardDef>();
+      for (const r of cardRewards) {
+        const def = cards.find((c) => c.id === r.cardId);
+        if (def) full.set(r.cardId, def);
+      }
+      setCardDefs(full);
+    });
+  }, [pool, run?.act]);
+
+  const cardRewards  = pool.filter((r): r is Extract<Reward, { kind: 'card' }>  => r.kind === 'card');
+  const goldRewards  = pool.filter((r): r is Extract<Reward, { kind: 'gold' }>  => r.kind === 'gold');
+  const relicRewards = pool.filter((r): r is Extract<Reward, { kind: 'relic' }> => r.kind === 'relic');
 
   function handlePick(reward: Reward | null) {
+    // UI-level guard: reject any click that arrives while we're waiting for
+    // the store to process the previous pick (machine.ts has a matching pool
+    // guard as a second line of defence).
+    if (pickingRef.current) return;
+    pickingRef.current = true;
     dispatch({ type: 'PICK_REWARD', reward });
   }
 
@@ -165,31 +200,58 @@ export default function RewardScreen({ pool }: RewardScreenProps) {
       className="min-h-screen bg-stone-950 flex flex-col items-center justify-center gap-8 px-4 py-10"
       role="main"
     >
-      <h1 className="text-amber-400 font-bold text-2xl uppercase tracking-widest">
-        Scegli una Ricompensa
-      </h1>
+      {/* Gold + relic — auto-pick row */}
+      {(goldRewards.length > 0 || relicRewards.length > 0) && (
+        <motion.div
+          className="flex flex-wrap gap-4 justify-center"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {goldRewards.map((r, i) => (
+            <motion.div key={`gold-${i}`} variants={itemVariants}>
+              <GoldReward reward={r} onPick={handlePick} disabled={pickingRef.current} />
+            </motion.div>
+          ))}
+          {relicRewards.map((r, i) => (
+            <motion.div key={`relic-${i}`} variants={itemVariants}>
+              <RelicReward reward={r} onPick={handlePick} disabled={pickingRef.current} />
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
 
-      <motion.div
-        className="flex flex-wrap gap-4 justify-center"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        role="list"
-        aria-label="Ricompense disponibili"
-      >
-        {pool.map((reward, i) => (
-          <motion.div key={i} variants={itemVariants} role="listitem">
-            {reward.kind === 'card'  && <CardReward  reward={reward} onPick={handlePick} />}
-            {reward.kind === 'relic' && <RelicReward reward={reward} onPick={handlePick} />}
-            {reward.kind === 'gold'  && <GoldReward  reward={reward} onPick={handlePick} />}
+      {/* Card choice */}
+      {cardRewards.length > 0 && (
+        <>
+          <h1 className="text-amber-400 font-bold text-2xl uppercase tracking-widest">
+            Scegli una carta
+          </h1>
+          <motion.div
+            className="flex flex-wrap gap-6 justify-center"
+            role="list"
+            aria-label="Carte disponibili"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {cardRewards.map((r, i) => (
+              <motion.div key={`card-${i}`} variants={itemVariants} role="listitem">
+                <CardReward reward={r} cardDefs={cardDefs} onPick={handlePick} disabled={pickingRef.current} />
+              </motion.div>
+            ))}
           </motion.div>
-        ))}
-      </motion.div>
+        </>
+      )}
 
       <button
         type="button"
         onClick={() => handlePick(null)}
-        className="text-stone-500 text-sm hover:text-stone-300 transition-colors underline underline-offset-4"
+        disabled={pickingRef.current}
+        className={[
+          'text-stone-500 text-sm transition-colors underline underline-offset-4',
+          pickingRef.current ? 'opacity-50 cursor-not-allowed' : 'hover:text-stone-300',
+        ].join(' ')}
         aria-label="Salta ricompensa"
       >
         Salta

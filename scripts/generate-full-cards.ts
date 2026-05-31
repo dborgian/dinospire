@@ -80,6 +80,7 @@ const CARD_SCENES: Record<string, string> = {
   carica_alpha_r:   'the dinosaur charging forward at full speed, head lowered, thunderous footsteps cracking the ground, dust trails behind, pure unstoppable momentum',
   sentinella_apex_r:'the dinosaur standing tall and alert on high rocky ground, surveying its territory, a glowing amber energy barrier materializing around it, guardian of the land',
   ruggito_sismico_r:'the dinosaur roaring so powerfully that the ground itself fractures and heaves, seismic cracks radiating out in all directions, the enemy off-balance',
+  stangata_r:       'the dinosaur delivering the final devastating bite to a collapsing enemy, gold coins and treasure bursting outward from the impact, victorious pose, ambient golden light raining down',
 
   // Veloce cards
   beccata_v:           'the feathered dinosaur striking with its sharp beak in a quick precise jab, feathers ruffled from the speed, a single precise wound on the enemy',
@@ -166,6 +167,8 @@ function effectText(effects: CardEffect[]): string {
       parts.push(`+${e.n} Energia`);
     } else if (e.kind === 'heal' && typeof e.amount === 'number') {
       parts.push(`Cura ${e.amount} HP`);
+    } else if (e.kind === 'onKillGainGold' && typeof e.amount === 'number') {
+      parts.push(`Colpo finale: guadagna ${e.amount} Oro`);
     }
   }
   return parts.join('. ') + '.';

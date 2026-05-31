@@ -64,6 +64,8 @@ export interface CombatScreenProps {
   gold?: number;
   /** Hero identifier — used to resolve sprite path */
   heroId?: string;
+  /** Current evolution stage — used to resolve sprite path */
+  evolutionStage?: string;
   /** Relics owned by the run, shown in the HUD */
   relics?: RelicId[];
 }
@@ -343,6 +345,7 @@ function PilePreview({ title, iids, cardDefs, onClose }: PilePreviewProps) {
 
 interface HeroZoneProps {
   heroId: string;
+  evolutionStage?: string;
   hp: number;
   maxHp: number;
   block: number;
@@ -410,7 +413,7 @@ function HeroStatusChip({ status, stacks }: { status: StatusKey; stacks: number 
   );
 }
 
-function HeroZone({ heroId, hp, maxHp, block, statuses, heroFlash, heroFloatNums }: HeroZoneProps) {
+function HeroZone({ heroId, evolutionStage = 'cucciolo', hp, maxHp, block, statuses, heroFlash, heroFloatNums }: HeroZoneProps) {
   const [spriteErr, setSpriteErr] = useState(false);
   const prefersReduced = useReducedMotion();
 
@@ -444,7 +447,7 @@ function HeroZone({ heroId, hp, maxHp, block, statuses, heroFlash, heroFloatNums
       >
         {!spriteErr ? (
           <img
-            src={`/art/heroes/${heroId}_cucciolo.png`}
+            src={`/art/heroes/${heroId}_${evolutionStage}.png`}
             alt={`Eroe ${heroId}`}
             className="h-56 w-auto object-contain drop-shadow-2xl"
             onError={() => setSpriteErr(true)}
@@ -618,6 +621,7 @@ export function CombatScreen({
   floorLabel = "Atto 1 · Piano 1",
   gold = 0,
   heroId = "borea",
+  evolutionStage = "cucciolo",
   relics = [],
 }: CombatScreenProps) {
   const combat = useCombatStore((s) => s.combat);
@@ -927,6 +931,7 @@ export function CombatScreen({
           )}
           <HeroZone
             heroId={heroId}
+            evolutionStage={evolutionStage}
             hp={combat.hero.hp}
             maxHp={combat.hero.maxHp}
             block={combat.hero.block}
