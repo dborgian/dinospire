@@ -2,7 +2,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { loadCards } from '../../game/content/index';
 import { useRunStore } from '../../stores/runStore';
-import type { Card, MapNode, NodeId, NodeType, EvolutionStage } from '../../game/types';
+import type { Card, CardInstance, MapNode, NodeId, NodeType, EvolutionStage } from '../../game/types';
+import { Card as CardComponent } from '../shared/Card';
 import RelicBar from '../shared/RelicBar';
 
 // ---- Constants ----
@@ -159,30 +160,11 @@ interface DeckOverlayProps {
 }
 
 function DeckOverlay({ deck, cardDefs, onClose }: DeckOverlayProps) {
-  // Group by cardId + upgraded to show counts
-  const counts = new Map<string, { def: Card | undefined; upgraded: boolean; count: number }>();
-  for (const ci of deck) {
-    const key = `${ci.cardId}|${ci.upgraded}`;
-    const existing = counts.get(key);
-    if (existing) {
-      existing.count++;
-    } else {
-      counts.set(key, { def: cardDefs.get(ci.cardId), upgraded: ci.upgraded, count: 1 });
-    }
-  }
-  const entries = [...counts.values()].sort((a, b) => {
-    const nameA = a.def?.name.it ?? a.def?.name.it ?? '';
-    const nameB = b.def?.name.it ?? b.def?.name.it ?? '';
-    return nameA.localeCompare(nameB, 'it');
+  const sorted = [...deck].sort((a, b) => {
+    const da = cardDefs.get(a.cardId);
+    const db = cardDefs.get(b.cardId);
+    return (da?.name.it ?? '').localeCompare(db?.name.it ?? '', 'it');
   });
-
-  const RARITY_COLOR: Record<string, string> = {
-    starter:  'text-stone-400',
-    common:   'text-stone-300',
-    uncommon: 'text-blue-300',
-    rare:     'text-amber-300',
-  };
-  const TYPE_ICON: Record<string, string> = { attack: '⚔', skill: '🛡', power: '⚡' };
 
   return (
     <>
@@ -199,7 +181,7 @@ function DeckOverlay({ deck, cardDefs, onClose }: DeckOverlayProps) {
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="fixed inset-x-0 bottom-0 z-50 bg-stone-900 border-t-2 border-stone-700 rounded-t-2xl p-4 max-h-[70vh] flex flex-col"
+        className="fixed inset-x-0 bottom-0 z-50 bg-stone-900 border-t-2 border-stone-700 rounded-t-2xl p-4 max-h-[80vh] flex flex-col"
         role="dialog"
         aria-label="Mazzo corrente"
       >
@@ -214,30 +196,30 @@ function DeckOverlay({ deck, cardDefs, onClose }: DeckOverlayProps) {
             ✕
           </button>
         </div>
-        <ul className="flex flex-col gap-1 overflow-y-auto">
-          {entries.map(({ def, upgraded, count }, i) => (
-            <li
-              key={i}
-              className="flex items-center gap-2 text-xs py-1 border-b border-stone-800"
-            >
-              <span className="text-stone-500 w-4 text-center">
-                {TYPE_ICON[def?.type ?? 'skill'] ?? '?'}
-              </span>
-              <span className={`font-semibold flex-1 ${RARITY_COLOR[def?.rarity ?? 'common']}`}>
-                {def?.name.it ?? def?.name.it ?? '???'}
-                {upgraded && <span className="text-amber-400 ml-1">+</span>}
-              </span>
-              <span className="text-stone-500">
-                {def?.cost ?? '?'}⚡
-              </span>
-              {count > 1 && (
-                <span className="text-stone-400 bg-stone-800 rounded-full px-1.5 py-0.5 text-xs">
-                  ×{count}
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
+        <div className="overflow-y-auto">
+          <div className="flex flex-wrap gap-3 justify-center pb-4">
+            {sorted.map((ci, i) => {
+              const def = cardDefs.get(ci.cardId);
+              if (!def) return null;
+              const instance: CardInstance = {
+                iid: `deck_${ci.cardId}_${i}` as CardInstance['iid'],
+                cardId: ci.cardId as CardInstance['cardId'],
+                upgraded: ci.upgraded,
+                temporary: false,
+              };
+              return (
+                <div key={i} className="scale-75 origin-top">
+                  <CardComponent
+                    instance={instance}
+                    definition={def}
+                    state="deck-preview"
+                    isPlayable={false}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </motion.div>
     </>
   );

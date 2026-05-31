@@ -25,11 +25,13 @@ import type {
   CardInstanceId,
   CardId,
   Card as CardDef,
+  CardInstance,
   IntentType,
   StatusKey,
   RelicId,
 } from "@/game/types";
 import RelicBar from "../shared/RelicBar";
+import { Card as CardComponent } from "../shared/Card";
 
 // ---------------------------------------------------------------------------
 // Arena background paths — populated by `npm run generate:backgrounds`
@@ -299,22 +301,23 @@ function EnemyCard({ enemy, onClick, isPulsing, isShaking, isEnemyTurn }: EnemyC
 interface PilePreviewProps {
   title: string;
   iids: CardInstanceId[];
+  cardInstances: Record<CardInstanceId, CardInstance>;
   cardDefs: Map<CardId, CardDef>;
   onClose: () => void;
 }
 
-function PilePreview({ title, iids, cardDefs, onClose }: PilePreviewProps) {
+function PilePreview({ title, iids, cardInstances, cardDefs, onClose }: PilePreviewProps) {
   return (
     <motion.div
       initial={{ y: "100%" }}
       animate={{ y: 0 }}
       exit={{ y: "100%" }}
       transition={{ type: "spring", damping: 30, stiffness: 300 }}
-      className="fixed inset-x-0 bottom-0 z-50 bg-stone-900 border-t-2 border-stone-700 rounded-t-2xl p-4 max-h-[60vh] overflow-y-auto"
+      className="fixed inset-x-0 bottom-0 z-50 bg-stone-900 border-t-2 border-stone-700 rounded-t-2xl p-4 max-h-[80vh] flex flex-col"
       role="dialog"
       aria-label={title}
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 shrink-0">
         <h2 className="text-sm font-bold text-stone-100">{title} ({iids.length})</h2>
         <button
           type="button"
@@ -325,16 +328,26 @@ function PilePreview({ title, iids, cardDefs, onClose }: PilePreviewProps) {
           ✕
         </button>
       </div>
-      <ul className="flex flex-col gap-1">
-        {iids.map((iid) => {
-          const def = cardDefs.get(iid as unknown as CardId);
-          return (
-            <li key={iid} className="flex items-center gap-2 text-xs text-stone-300 py-0.5 border-b border-stone-800">
-              <span className="font-semibold">{def?.name.it ?? iid}</span>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="overflow-y-auto">
+        <div className="flex flex-wrap gap-3 justify-center pb-4">
+          {iids.map((iid) => {
+            const instance = cardInstances[iid];
+            if (!instance) return null;
+            const def = cardDefs.get(instance.cardId);
+            if (!def) return null;
+            return (
+              <div key={iid} className="scale-75 origin-top">
+                <CardComponent
+                  instance={instance}
+                  definition={def}
+                  state="deck-preview"
+                  isPlayable={false}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </motion.div>
   );
 }
@@ -1041,7 +1054,8 @@ export function CombatScreen({
             <PilePreview
               title={pilePreview === "draw" ? "Mazzo (pescaggio)" : "Scarti"}
               iids={pilePreview === "draw" ? combat.piles.draw : combat.piles.discard}
-              cardDefs={iidToDefMap}
+              cardInstances={combat.cardInstances}
+              cardDefs={cardDefs}
               onClose={() => setPilePreview(null)}
             />
           </>
